@@ -64,6 +64,12 @@ local function clear_p2_input(input)
   end
 end
 
+-- TEMPORARY debug: logging to the Lua console's Output box (not on-screen)
+-- so we get a scrollback history instead of needing to catch one exact
+-- frame with a screenshot — chasing a reported bug where Ken doesn't block
+-- correctly on one particular side. Remove once understood.
+local previous_life = nil
+
 local function before_frame()
   local input = joypad.get()
   clear_p2_input(input)
@@ -75,22 +81,19 @@ local function before_frame()
     return
   end
 
-  -- TEMPORARY debug: figuring out the semantics of the parry validity/
-  -- cooldown timers, and now also chasing a reported bug where Ken doesn't
-  -- block when he ends up on the LEFT side of the screen (P1 on the
-  -- right). Remove once both are understood.
-  local p2_parry = Memory.read_parry_timers(2)
   local self_state = Memory.read_player_state(AIUtil.SELF_ID)
   local opp_state = Memory.read_player_state(AIUtil.OPPONENT_ID)
-  gui.text(10, 10, string.format(
-    "P2 fwd v:%d c:%d  down v:%d c:%d",
-    p2_parry.forward.validity, p2_parry.forward.cooldown,
-    p2_parry.down.validity, p2_parry.down.cooldown))
-  gui.text(10, 20, string.format(
-    "P2 x:%d  P1 x:%d  backward:%s  threat:%s",
-    self_state.pos_x, opp_state.pos_x,
-    AIUtil.backward_input(self_state, opp_state),
-    tostring(Block.has_threat())))
+  local threat = Block.has_threat()
+  local took_damage = previous_life ~= nil and self_state.life < previous_life
+  previous_life = self_state.life
+
+  if threat or took_damage then
+    print(string.format(
+      "frame:%d  P2 x:%d life:%d  P1 x:%d  backward:%s  threat:%s%s",
+      Memory.frame_number(), self_state.pos_x, self_state.life, opp_state.pos_x,
+      AIUtil.backward_input(self_state, opp_state), tostring(threat),
+      took_damage and "  <-- TOOK DAMAGE" or ""))
+  end
 
   AI.decide(input)
   joypad.set(input)

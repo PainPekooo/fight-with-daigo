@@ -80,11 +80,17 @@ without touching the controller. During the match:
 - Reactive anti-air: shoryuken (random LP/MP/HP, EX if there's meter) 60%
   of the time, a normal anti-air (st.HP) the rest — so it's not 100%
   predictable or always air-parryable — with cooldown and a random delay.
-- Melee blocking (based on a real attack hitbox, not distance) and blocking
-  against hadoukens (reads the projectile list), with a parry attempt
-  before blocking (always against projectiles; occasional — 18% — against
-  melee hits, the nod to Evo Moment 37, with Block as a fallback if it
-  fails).
+- Melee blocking (based on a real attack hitbox, not distance, crouching
+  only for lows) and standing blocking against hadoukens (reads the
+  projectile list), with a parry attempt before blocking (always against
+  projectiles; occasional — 18% — against melee hits, the nod to Evo Moment
+  37, with Block as a fallback if it fails).
+  Known limitation: reacting only once the hit is already active means
+  there's no lead time — a fast enough move (in this game, "close" normals
+  tend to be quicker than their "far" versions) can still connect before
+  the block registers, especially at point-blank range. Fixing this for
+  real needs predicting the block from the opponent's move startup, which
+  needs frame data for the whole cast, not just Ken.
 - Throw tech at grab range, alternating between a neutral throw and a back
   throw (crosses the opponent to the other side).
 - **Wake-up mixup**: on a knockdown, alternates between a throw attempt and

@@ -64,12 +64,6 @@ local function clear_p2_input(input)
   end
 end
 
--- TEMPORARY debug: logging to the Lua console's Output box (not on-screen)
--- so we get a scrollback history instead of needing to catch one exact
--- frame with a screenshot — chasing a reported bug where Ken doesn't block
--- correctly on one particular side. Remove once understood.
-local previous_life = nil
-
 local function before_frame()
   local input = joypad.get()
   clear_p2_input(input)
@@ -79,20 +73,6 @@ local function before_frame()
     CharacterSelect.force_ken(input)
     joypad.set(input)
     return
-  end
-
-  local self_state = Memory.read_player_state(AIUtil.SELF_ID)
-  local opp_state = Memory.read_player_state(AIUtil.OPPONENT_ID)
-  local threat = Block.has_threat()
-  local took_damage = previous_life ~= nil and self_state.life < previous_life
-  previous_life = self_state.life
-
-  if threat or took_damage then
-    print(string.format(
-      "frame:%d  P2 x:%d life:%d  P1 x:%d  backward:%s  threat:%s%s",
-      Memory.frame_number(), self_state.pos_x, self_state.life, opp_state.pos_x,
-      AIUtil.backward_input(self_state, opp_state), tostring(threat),
-      took_damage and "  <-- TOOK DAMAGE" or ""))
   end
 
   AI.decide(input)

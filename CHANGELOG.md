@@ -2,6 +2,22 @@
 
 Notable changes to this project, most recent first.
 
+## Investigated a reported left/right blocking bug — found something else
+
+- Live-debugged (console logging with scrollback) a report that Ken failed
+  to block on one particular side. Ruled out: every direction/threat
+  calculation checked out correct on both sides, and the user confirmed
+  reproducing it on both sides too.
+- Real finding: it's about range, not side. Point-blank hits sometimes beat
+  the block, mid-range ones don't — likely because "close" normals in this
+  game tend to have faster startup than their "far" versions, and reactive
+  (react-only-once-active) blocking has zero lead time. Documented as a
+  known limitation (see README) rather than a bug — fixing it for real
+  needs predictive blocking with frame data for the whole cast.
+- Along the way: Block no longer always crouches — only for lows (opponent
+  crouching), standing block otherwise (including projectiles), which
+  looked odd before.
+
 ## Evo Moment 37 easter egg: fix mash-vs-single-attempt bug
 
 - Live-tested with `opponent_sa` debug confirmed correctly captured (1 =

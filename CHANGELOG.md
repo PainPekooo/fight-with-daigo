@@ -2,6 +2,11 @@
 
 Notable changes to this project, most recent first.
 
+## README: new banner image
+
+- Swapped the title banner for a more dynamic action shot (Ken taking a
+  jump kick), text repositioned to the bottom so it doesn't cover the hit.
+
 ## README: synopsis + how-to up top
 
 - Added a short, punchy synopsis right after the title.

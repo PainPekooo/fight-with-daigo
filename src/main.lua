@@ -76,14 +76,21 @@ local function before_frame()
   end
 
   -- TEMPORARY debug: figuring out the semantics of the parry validity/
-  -- cooldown timers (never used before) by watching Ken's (P2, the one
-  -- already auto-attempting fireball parries) own values while P1 throws
-  -- hadoukens from far away. Remove once understood.
+  -- cooldown timers, and now also chasing a reported bug where Ken doesn't
+  -- block when he ends up on the LEFT side of the screen (P1 on the
+  -- right). Remove once both are understood.
   local p2_parry = Memory.read_parry_timers(2)
+  local self_state = Memory.read_player_state(AIUtil.SELF_ID)
+  local opp_state = Memory.read_player_state(AIUtil.OPPONENT_ID)
   gui.text(10, 10, string.format(
     "P2 fwd v:%d c:%d  down v:%d c:%d",
     p2_parry.forward.validity, p2_parry.forward.cooldown,
     p2_parry.down.validity, p2_parry.down.cooldown))
+  gui.text(10, 20, string.format(
+    "P2 x:%d  P1 x:%d  backward:%s  threat:%s",
+    self_state.pos_x, opp_state.pos_x,
+    AIUtil.backward_input(self_state, opp_state),
+    tostring(Block.has_threat())))
 
   AI.decide(input)
   joypad.set(input)

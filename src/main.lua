@@ -18,6 +18,7 @@ dofile(SCRIPT_DIR .. "memory.lua")
 dofile(SCRIPT_DIR .. "character_select.lua")
 dofile(SCRIPT_DIR .. "projectiles.lua")
 dofile(SCRIPT_DIR .. "ai/util.lua")
+dofile(SCRIPT_DIR .. "opponent_tracker.lua")
 dofile(SCRIPT_DIR .. "ai/anti_air.lua")
 dofile(SCRIPT_DIR .. "ai/block.lua")
 dofile(SCRIPT_DIR .. "ai/parry_fireball.lua")
@@ -66,17 +67,13 @@ end
 local function before_frame()
   local input = joypad.get()
   clear_p2_input(input)
+  OpponentTracker.update()
 
   if not Memory.is_round_active() then
     CharacterSelect.force_ken(input)
     joypad.set(input)
     return
   end
-
-  -- TEMPORARY debug: verifying the real action_state id for Chun-Li's SA2
-  -- (Houyoku Sen) for the Evo Moment 37 easter egg. Remove once confirmed.
-  local opponent_state = Memory.read_player_state(AIUtil.OPPONENT_ID)
-  gui.text(10, 10, string.format("P1 %s  action_state:%04x", tostring(opponent_state.char_name), opponent_state.action_state))
 
   AI.decide(input)
   joypad.set(input)

@@ -101,13 +101,17 @@ without touching the controller. During the match:
   jump, or holding ground at random — not always a straight line forward)
   and pokes (random cr.MK / cr.MP / st.MP) when the opponent enters range,
   with an occasional step back after poking.
+- **Easter egg**: if the opponent is Chun-Li and picked SA2 (Houyoku Sen)
+  at character select, the melee parry attempt chance goes to 100% instead
+  of 18% — the Evo Moment 37 recreation. Doesn't fingerprint the specific
+  move by its `action_state` id (a candidate we found in the framedata
+  turned out not to match how that field actually reads at runtime); since
+  a character can only have one Super Art per match, knowing she picked
+  SA2 is enough.
 
 TODO: actually model reads/opponent profiling (beyond the reaction delay
 and whiff punish), more research into real sources about Daigo to replace
-the generic parameters that remain, and an easter egg: guaranteed parry if
-the opponent is Chun-Li and throws her SA2 (Houyoku Sen, Evo Moment 37). A
-candidate was found in Chun-Li's framedata (move id `5f54`, 17 hit windows
-across 121 frames — matches the profile) but it's not confirmed live yet.
+the generic parameters that remain.
 
 ## Requirements
 
@@ -124,6 +128,7 @@ src/
   memory.lua         -- memory addresses and player state reading
   projectiles.lua    -- reads the list of active projectiles
   character_select.lua -- forces P2 = Ken (white gi, SA3)
+  opponent_tracker.lua -- remembers P1's picked Super Art (Evo Moment 37 easter egg)
   ai/
     decide.lua       -- orchestrator: priority between the rules below
     util.lua          -- shared helpers (jump posture, directions)

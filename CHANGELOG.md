@@ -2,6 +2,16 @@
 
 Notable changes to this project, most recent first.
 
+## Evo Moment 37 easter egg
+
+- Guaranteed melee parry (100% instead of 18%) if the opponent is Chun-Li
+  and picked SA2 (Houyoku Sen) at character select.
+- Live-verified that the framedata-based move-id candidate we had for
+  Houyoku Sen (`5f54`) was wrong — the real `action_state` value doesn't
+  match that format. Pivoted to a more robust approach that doesn't need
+  to fingerprint the specific move: since a character can only pick one
+  Super Art per match, knowing Chun-Li picked SA2 is enough on its own.
+
 ## Wake-up mixup
 
 - On a knockdown, Ken now alternates between a throw attempt and a meaty

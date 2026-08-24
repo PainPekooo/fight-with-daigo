@@ -18,6 +18,14 @@
 -- carried a guaranteed one-frame guard-drop risk. Now gated the same way
 -- melee is: roll once per incoming projectile, and only take the risk that
 -- fraction of the time.
+--
+-- (Tried gating this further on Memory.can_attempt_parry -- "is Ken's own
+-- parry input currently eligible" -- but live logging showed the
+-- validity/cooldown `state` field cycles through 5 values (0-4), not the
+-- simple 1-can/3-cannot binary effie3rd's code implied. That binary was
+-- what THEY force-write for their auto-parry cheat, not necessarily what
+-- the state machine does natively. Reverted rather than gate on a disproven
+-- assumption -- see memory.lua.)
 
 ParryFireball = {}
 

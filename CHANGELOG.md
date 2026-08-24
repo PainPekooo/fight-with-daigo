@@ -2,6 +2,22 @@
 
 Notable changes to this project, most recent first.
 
+## Investigated "precise" parry gating — mapped the data, reverted the gate
+
+- Cross-checked effie3rd/3rd_training_lua's `memory_addresses.lua`
+  (GPL-3.0, read only — see reference memory) against our own parry
+  validity/cooldown addresses: their P1 addresses matched ours exactly,
+  and their P2 addresses matched our own offset math, good independent
+  confirmation. Added the `state` address (cooldown + 2 bytes) we didn't
+  have before.
+- Tried gating `ParryFireball`/`ParryMelee`'s attempts on `state == 1`
+  ("can attempt right now"), based on how their code force-writes 1/3 for
+  an auto-parry cheat feature. Live-logged our own `state` values before
+  trusting it: it isn't a simple binary, it's a 5-value cycle (0-4) whose
+  exact meaning isn't decoded yet. Reverted the gate rather than ship
+  behavior based on a disproven assumption — see `memory.lua` for what we
+  now know and don't. Nothing in `ai/` reads `state` right now.
+
 ## Live-playtest fixes: wake-up grab spam, tatsumaki spam, EX meter waste
 
 - **Wake-up throw spam**: `WakeupMixup`'s throw choice used to mash the

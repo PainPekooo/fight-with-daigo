@@ -55,16 +55,32 @@ M.GLOBAL = {
 }
 
 -- Fixed per-player pointers that aren't part of the base struct
+-- `state` (cooldown + 2 bytes) is new: not something we mapped ourselves,
+-- cross-checked against effie3rd/3rd_training_lua's memory_addresses.lua
+-- (GPL-3.0 — only read to confirm addresses/facts about the game, no code
+-- copied, see reference memory). Their P1 addresses matched ours exactly,
+-- and their P2 addresses matched our own +0x406/+0x620 offset math, which
+-- is good independent confirmation our mapping was already right.
+-- `state` itself: their code treats 1 as "can attempt" and 3 as "can't",
+-- but that's what THEY force-write for an auto-parry cheat feature, not
+-- necessarily the state machine's natural values. Live-logged it
+-- ourselves and it isn't that simple: it cycles through (at least) 0-4
+-- during normal play — roughly idle (0/1, the two seem to alternate at
+-- rest for reasons we haven't identified) -> window opens (2, validity and
+-- cooldown both near their max) -> window closing while cooldown ticks
+-- down (3) -> tail end (4) -> back to idle. Not decoded well enough to
+-- gate live behavior on yet — kept mapped for whenever someone wants to
+-- take another pass at it, but nothing in ai/ reads `state` right now.
 M.PLAYER_FIXED = {
   [1] = {
     gauge       = 0x020695B5, -- super meter, full bars
     meter_count = 0x020695BF, -- super meter, progress within the current bar
     stun_max    = 0x020695F7,
     parry = {
-      forward = { validity = 0x02026335, cooldown = 0x02025731 },
-      down    = { validity = 0x02026337, cooldown = 0x0202574D },
-      air     = { validity = 0x02026339, cooldown = 0x02025769 },
-      antiair = { validity = 0x02026347, cooldown = 0x0202582D },
+      forward = { validity = 0x02026335, cooldown = 0x02025731, state = 0x02025733 },
+      down    = { validity = 0x02026337, cooldown = 0x0202574D, state = 0x0202574F },
+      air     = { validity = 0x02026339, cooldown = 0x02025769, state = 0x0202576B },
+      antiair = { validity = 0x02026347, cooldown = 0x0202582D, state = 0x0202582F },
     },
   },
   [2] = {
@@ -72,10 +88,10 @@ M.PLAYER_FIXED = {
     meter_count = 0x020695EB,
     stun_max    = 0x0206960B,
     parry = {
-      forward = { validity = 0x02026335 + 0x406, cooldown = 0x02025731 + 0x620 },
-      down    = { validity = 0x02026337 + 0x406, cooldown = 0x0202574D + 0x620 },
-      air     = { validity = 0x02026339 + 0x406, cooldown = 0x02025769 + 0x620 },
-      antiair = { validity = 0x02026347 + 0x406, cooldown = 0x0202582D + 0x620 },
+      forward = { validity = 0x02026335 + 0x406, cooldown = 0x02025731 + 0x620, state = 0x02025733 + 0x620 },
+      down    = { validity = 0x02026337 + 0x406, cooldown = 0x0202574D + 0x620, state = 0x0202574F + 0x620 },
+      air     = { validity = 0x02026339 + 0x406, cooldown = 0x02025769 + 0x620, state = 0x0202576B + 0x620 },
+      antiair = { validity = 0x02026347 + 0x406, cooldown = 0x0202582D + 0x620, state = 0x0202582F + 0x620 },
     },
   },
 }
@@ -102,23 +118,23 @@ M.PLAYER_SELECT = {
   },
 }
 
--- Never used until now (mapped at the very start of the project, before we
--- even had a working script). Reads a player's parry validity/cooldown
--- timers — likely the game's own bookkeeping for "is a parry input eligible
--- right now" per direction, though we don't know the exact semantics yet
--- (does validity count up or down? is cooldown nonzero only right after an
--- attempt?) — being verified live for the Evo Moment 37 easter egg's
--- timing.
+-- Mapped at the very start of the project, before we even had a working
+-- script — long unused because we didn't know the semantics. See the
+-- M.PLAYER_FIXED comment above for the current (incomplete) understanding.
 function M.read_parry_timers(player_id)
   local p = M.PLAYER_FIXED[player_id].parry
-  local function pair(addrs)
-    return { validity = memory.readbyte(addrs.validity), cooldown = memory.readbyte(addrs.cooldown) }
+  local function triple(addrs)
+    return {
+      validity = memory.readbyte(addrs.validity),
+      cooldown = memory.readbyte(addrs.cooldown),
+      state    = memory.readbyte(addrs.state),
+    }
   end
   return {
-    forward = pair(p.forward),
-    down    = pair(p.down),
-    air     = pair(p.air),
-    antiair = pair(p.antiair),
+    forward = triple(p.forward),
+    down    = triple(p.down),
+    air     = triple(p.air),
+    antiair = triple(p.antiair),
   }
 end
 

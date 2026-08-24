@@ -71,10 +71,18 @@ M.GLOBAL = {
 -- down (3) -> tail end (4) -> back to idle. Not decoded well enough to
 -- gate live behavior on yet — kept mapped for whenever someone wants to
 -- take another pass at it, but nothing in ai/ reads `state` right now.
+-- gauge/meter_count were swapped from the start (never verified live).
+-- Live-logged both this session: the address now under `gauge` cycles 0 up
+-- to ~76-79 and then wraps back down to a small number WHILE the address
+-- now under `meter_count` ticks up by 1 -- i.e. what we had backwards: the
+-- old `gauge` address was really the fine progress within the current bar,
+-- and the old `meter_count` address was really the full-bar count. Swapped
+-- here so `gauge` (the name every `gauge >= 1` check in ai/ already reads
+-- as "do I have a usable bar") points at the address that's actually that.
 M.PLAYER_FIXED = {
   [1] = {
-    gauge       = 0x020695B5, -- super meter, full bars
-    meter_count = 0x020695BF, -- super meter, progress within the current bar
+    gauge       = 0x020695BF, -- super meter, full bars
+    meter_count = 0x020695B5, -- super meter, progress within the current bar
     stun_max    = 0x020695F7,
     parry = {
       forward = { validity = 0x02026335, cooldown = 0x02025731, state = 0x02025733 },
@@ -84,8 +92,8 @@ M.PLAYER_FIXED = {
     },
   },
   [2] = {
-    gauge       = 0x020695E1,
-    meter_count = 0x020695EB,
+    gauge       = 0x020695EB,
+    meter_count = 0x020695E1,
     stun_max    = 0x0206960B,
     parry = {
       forward = { validity = 0x02026335 + 0x406, cooldown = 0x02025731 + 0x620, state = 0x02025733 + 0x620 },

@@ -1,6 +1,6 @@
--- Punish combo: cr.MK canceled into Super Art (if there's meter) or into
--- shoryuken (if not). Triggered from whiff_punish.lua instead of a single
--- hit.
+-- Punish combo: a crouching normal canceled into Super Art (if there's
+-- meter) or into shoryuken (if not). Triggered from whiff_punish.lua
+-- instead of a single hit.
 --
 -- The first attempt came out separated (blockable in the middle): we
 -- started the special's motion right as the cr.MK button was released
@@ -12,6 +12,18 @@
 -- (we haven't confirmed the exact cancel window, which isn't necessarily
 -- identical to hit_frames) — needs re-confirming live.
 --
+-- Second starter, cr.MP, added the same way: real Ken bread-and-butter per
+-- EventHubs' guide (Ken confirms into specials from his crouching
+-- medium-strength normals, not just cr.MK —
+-- https://www.eventhubs.com/guides/2009/may/11/ken-street-fighter-3-third-strike-character-guide/),
+-- with its own cancel window read from the same local framedata (move id
+-- "aeb8", active frames 5-8, one frame earlier than cr.MK). The move id ->
+-- name mapping ("b0e8" = d_MK, "aeb8" = d_MP) came from cross-referencing
+-- effie3rd/3rd_training_lua's actiondata (GPL-3.0, read only for the
+-- names, not copied — see reference memory); the actual frame numbers used
+-- here are our own, from the already-trusted local reference data. Picked
+-- randomly between the two so the punish isn't always the same starter.
+--
 -- The shoryuken motion here is a local copy, deliberately NOT sharing a
 -- module with anti_air.lua: if two callers claim the same shared module on
 -- the same frame (e.g. AntiAir triggers while this combo is halfway
@@ -20,13 +32,16 @@
 
 ComboPunish = {}
 
-local STARTER_FRAMES = 2 -- hold Down+MK
-local WAIT_FRAMES = 4    -- wait until ~frame 6 (cr.MK active) before canceling
+local STARTERS = {
+  { key = "P2 Medium Kick", starter_frames = 2, wait_frames = 4 }, -- cr.MK, active at frame 6 (b0e8)
+  { key = "P2 Medium Punch", starter_frames = 2, wait_frames = 3 }, -- cr.MP, active at frame 5 (aeb8)
+}
 
 local phase = "idle" -- "idle" | "starter" | "wait" | "special"
 local frame_in_phase = 0
 local use_super = false
 local srk_step = 0
+local current_starter = nil
 
 function ComboPunish.active()
   return phase ~= "idle"
@@ -37,6 +52,7 @@ function ComboPunish.start(super_available)
     phase = "starter"
     frame_in_phase = 0
     use_super = super_available
+    current_starter = STARTERS[math.random(#STARTERS)]
   end
 end
 
@@ -76,9 +92,9 @@ function ComboPunish.decide(input)
 
   if phase == "starter" then
     input["P2 Down"] = true
-    input["P2 Medium Kick"] = true
+    input[current_starter.key] = true
     frame_in_phase = frame_in_phase + 1
-    if frame_in_phase >= STARTER_FRAMES then
+    if frame_in_phase >= current_starter.starter_frames then
       phase = "wait"
       frame_in_phase = 0
     end
@@ -86,9 +102,9 @@ function ComboPunish.decide(input)
   end
 
   if phase == "wait" then
-    input["P2 Down"] = true -- stays crouched, cr.MK's posture
+    input["P2 Down"] = true -- stays crouched, the starter's posture
     frame_in_phase = frame_in_phase + 1
-    if frame_in_phase >= WAIT_FRAMES then
+    if frame_in_phase >= current_starter.wait_frames then
       phase = "special"
       if use_super then
         SuperArt.start()

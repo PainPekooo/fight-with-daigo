@@ -103,12 +103,13 @@ without touching the controller. During the match:
   the whole knockdown window — live-tested and reported as an obvious tell
   that let a reversal shoryuken always beat it.
 - **Whiff punish**: punishes the opponent the instant they enter recovery,
-  with a combo (cr.MK canceled into Super Art if there's meter, or into
-  shoryuken if not) instead of a single hit — the only rule based on real
-  research about Daigo (see above), not on generic fundamentals. The
-  cancel timing (`combo_punish.lua`) still isn't confirmed live — we don't
-  know for sure whether it connects as a real combo or as two separate
-  hits.
+  with a combo (cr.MK or cr.MP, picked at random, canceled into Super Art
+  if there's meter, or into shoryuken if not) instead of a single hit —
+  the whiff-punish idea itself is the only rule based on real research
+  about Daigo (see above); the specific starters are real Ken
+  bread-and-butter (cited in `combo_punish.lua`), not generic fundamentals.
+  The cancel timing still isn't confirmed live — we don't know for sure
+  whether either one connects as a real combo or as two separate hits.
 - Footsies: closes the distance (walking, dashing, tatsumaki, offensive
   jump, or holding ground at random — not always a straight line forward,
   and discounted from repeating the same one twice in a row) and pokes

@@ -2,6 +2,45 @@
 
 Notable changes to this project, most recent first.
 
+## Fix gauge/meter_count swap — Super Art was firing without real meter
+
+- Live-tested the new cr.MP combo starter and it "didn't do the combo" —
+  debugged with console logging and found `gauge` and `meter_count` were
+  swapped from the very start of the project (comment claimed `gauge` =
+  full bars, but it actually cycles 0 up to ~76-79 then wraps to a small
+  number while `meter_count` ticks up by 1 — the two were backwards).
+- Every `self_state.gauge >= 1` check in `ai/` (anti-air's EX shoryuken,
+  footsies' EX tatsumaki, and whiff-punish's super-vs-shoryuken choice)
+  was reading fine meter progress instead of full-bar count, which is
+  true almost immediately after gaining any meter at all. That's why the
+  whiff-punish combo looked broken: it kept trying to go for Super Art
+  (`use_super` nearly always true) even with zero real bars, the game
+  silently rejected the Super input, and nothing visible happened after
+  the starter normal.
+- Fixed at the source in `memory.lua` (swapped which address `gauge` and
+  `meter_count` point to) rather than patching every call site — every
+  existing `gauge >= 1` check is now correct without further changes.
+  Likely also explains any past "EX didn't come out" moments that were
+  never specifically investigated.
+
+## Add a second whiff-punish combo starter: cr.MP
+
+- `combo_punish.lua` now picks randomly between cr.MK (existing) and
+  cr.MP as the combo starter, each canceled into Super Art (if there's
+  meter) or shoryuken (if not), same as before.
+- cr.MP is real Ken bread-and-butter — EventHubs' guide (same source
+  already cited for SA3's motion) confirms Ken confirms into specials from
+  his crouching medium normals generally, not just cr.MK.
+- Its cancel window (active at frame 5, one frame earlier than cr.MK's
+  frame 6) came from the same local reference framedata already used for
+  cr.MK — not re-guessed. The move id -> name mapping ("aeb8" = cr.MP)
+  came from cross-referencing effie3rd/3rd_training_lua's actiondata
+  (GPL-3.0, read only for the name, not copied — same precedent as the
+  parry address investigation); the actual frame numbers are our own
+  already-trusted local data, not sourced from them.
+- Not live-confirmed yet whether it connects as a true combo (same caveat
+  as the existing cr.MK route).
+
 ## Add a third read: turtle/keep-away (not just projectile zoning)
 
 - New tendency in `opponent_reads.lua`: counts episodes of the opponent

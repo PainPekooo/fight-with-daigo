@@ -2,6 +2,22 @@
 
 Notable changes to this project, most recent first.
 
+## Max difficulty pass ("al palo")
+
+- Re-enabled Footsies (had been temporarily commented out while debugging
+  parry timing).
+- Cut anti-air and block reaction delay to near frame-perfect (0-1 frames,
+  down from 1-3 and 1-2), widened both their trigger ranges, and raised
+  shoryuken/EX-shoryuken frequency (0.6→0.75, 0.3→0.5).
+- Raised melee parry attempt chance (0.18→0.4) and widened whiff-punish
+  range (100→130).
+- Made footsies more aggressive: shorter poke cooldown, less retreating,
+  and more weight on dash/tatsumaki over plain walking to close distance.
+- All still probabilistic/randomized, not hard-reads or frame-perfect
+  reflexes on every single interaction — see the trade-offs called out
+  inline in each file (e.g. `SRK_CHANCE` staying under 1.0 in
+  `anti_air.lua` so DP stays air-parryable, not a guaranteed reflex).
+
 ## Investigated a reported left/right blocking bug — found something else
 
 - Live-debugged (console logging with scrollback) a report that Ken failed

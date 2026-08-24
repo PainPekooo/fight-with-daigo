@@ -33,7 +33,10 @@
 
 ParryMelee = {}
 
-local ATTEMPT_CHANCE = 0.18
+-- Raised from 0.18 to 0.4 for max difficulty ("al palo") — more parry
+-- attempts, and therefore more whiffed ones too when it fails (Block still
+-- covers most hits either way, see decide.lua).
+local ATTEMPT_CHANCE = 0.4
 local CHUNLI_SA2_INDEX = 1 -- 0-based: SA1=0, SA2=1, SA3=2 (same convention as ours)
 local was_threatened = false
 

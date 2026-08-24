@@ -5,7 +5,9 @@
 
 AntiAir = {}
 
-local ANTI_AIR_RANGE = 90 -- horizontal distance (in pos_x units) to react
+-- Widened from 90 to 110 for max difficulty (request: "al palo") — catches
+-- jumps started a bit further out instead of only point-blank ones.
+local ANTI_AIR_RANGE = 110
 
 -- Shoryuken sequence (623+P): forward, down, down-forward+HP.
 -- (The first attempt had the order reversed — 236 is hadouken, not
@@ -25,10 +27,11 @@ local cooldown = 0
 -- Random delay before starting the sequence, so it doesn't always react on
 -- the exact frame the opponent jumps (looks robotic). Not a verified human
 -- reaction-time figure, just a reasonable range so variation shows without
--- losing the anti-air entirely. Shrunk from 2-6 to 1-3 on request (wanted
--- more difficulty) — still some variation, but tighter.
-local REACTION_DELAY_MIN = 1
-local REACTION_DELAY_MAX = 3
+-- losing the anti-air entirely. Shrunk from 2-6 to 1-3, then to 0-1 for max
+-- difficulty ("al palo") — near frame-perfect, only a hair of variation left
+-- so it isn't literally the same frame every time.
+local REACTION_DELAY_MIN = 0
+local REACTION_DELAY_MAX = 1
 local pending_delay = nil
 
 -- Variety: not always HP (the flashiest/strongest, with the most hits).
@@ -41,13 +44,15 @@ local current_punch = nil
 -- coming) and risky if it whiffs (long recovery, whiff punishable).
 -- Sometimes we use a normal anti-air (st.HP) instead of the special —
 -- safer, less flashy, but breaks the pattern. Ties into the research on
--- the "Ume-Shoryu": a calculated gamble, not a guaranteed reflex.
-local SRK_CHANCE = 0.6
+-- the "Ume-Shoryu": a calculated gamble, not a guaranteed reflex. Raised
+-- from 0.6 to 0.75 for max difficulty ("al palo") — still not a 100%
+-- robotic DP, but close.
+local SRK_CHANCE = 0.75
 
 -- EX shoryuken (2 punches instead of 1) when there's meter available —
 -- more damage and extra invincibility. Not always, so we don't burn meter
--- on every jump.
-local EX_CHANCE = 0.3
+-- on every jump. Raised from 0.3 to 0.5 for max difficulty.
+local EX_CHANCE = 0.5
 
 -- Returns true if it took the frame (the orchestrator must not let another
 -- AI rule override this input).

@@ -13,7 +13,9 @@
 
 WhiffPunish = {}
 
-local PUNISH_RANGE = 100 -- reasonable reach for a strong punish hit
+-- Widened from 100 to 130 for max difficulty ("al palo") -- catches whiffs
+-- from a bit further out.
+local PUNISH_RANGE = 130
 local was_recovering = false
 
 function WhiffPunish.decide(input)

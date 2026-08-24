@@ -13,9 +13,13 @@ Footsies = {}
 local POKE_RANGE_MIN = 60  -- below this it doesn't advance (close-range defense already covers it)
 local POKE_RANGE_MAX = 100 -- above this it closes the distance
 local POKE_HOLD_FRAMES = 2
-local POKE_COOLDOWN_FRAMES = 30
+-- Shrunk from 30 to 18 for max difficulty ("al palo") -- pokes come out
+-- noticeably more often.
+local POKE_COOLDOWN_FRAMES = 18
 
-local RETREAT_CHANCE = 0.25
+-- Shrunk from 0.25 to 0.12 for max difficulty -- backs off less, stays on
+-- the offensive more.
+local RETREAT_CHANCE = 0.12
 local RETREAT_FRAMES_MIN = 10
 local RETREAT_FRAMES_MAX = 20
 
@@ -29,8 +33,10 @@ local POKES = {
 -- How to close the distance, with weights (not every option equally
 -- often). "retreat" is the exception: instead of closing in, it backs off
 -- for a stretch — so the approach isn't always a straight line forward.
+-- Reweighted for max difficulty ("al palo"): less walk/retreat, more
+-- dash/tatsu closing the gap fast.
 local APPROACH_OPTIONS = { "walk", "tatsu", "dash", "jump", "retreat" }
-local APPROACH_WEIGHTS = { walk = 0.35, tatsu = 0.15, dash = 0.20, jump = 0.10, retreat = 0.20 }
+local APPROACH_WEIGHTS = { walk = 0.25, tatsu = 0.20, dash = 0.30, jump = 0.15, retreat = 0.10 }
 
 local RETREAT_APPROACH_FRAMES_MIN = 15
 local RETREAT_APPROACH_FRAMES_MAX = 30

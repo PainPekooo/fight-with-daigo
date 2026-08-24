@@ -32,11 +32,13 @@
 
 Block = {}
 
-local PROJECTILE_RANGE = 180 -- distance to react to an incoming projectile
+-- Widened from 180 to 220 for max difficulty ("al palo") — starts reacting
+-- to a fireball earlier.
+local PROJECTILE_RANGE = 220
 
--- Shrunk from 2-5 to 1-2 on request (wanted more difficulty).
-local REACTION_DELAY_MIN = 1
-local REACTION_DELAY_MAX = 2
+-- Shrunk from 2-5 to 1-2, then to 0-1 for max difficulty.
+local REACTION_DELAY_MIN = 0
+local REACTION_DELAY_MAX = 1
 local pending_delay = nil
 local blocking_active = false
 

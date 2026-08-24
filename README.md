@@ -11,6 +11,8 @@ goes for the parry. Not another generic hard CPU — a rule-based bot built by
 reading the game's memory live, made specifically to fight like Daigo
 Umehara.
 
+See [CHANGELOG.md](CHANGELOG.md) for what's changed recently.
+
 ## How to install & run
 
 1. **Get the ROM.** You need a legitimate `sfiii3nr1` (Japan 990512) ROM

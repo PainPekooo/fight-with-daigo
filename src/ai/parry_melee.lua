@@ -1,15 +1,14 @@
--- Parry cuerpo a cuerpo, intento ocasional. Evo Moment 37 fue justamente
--- esto — un parry a un combo cuerpo a cuerpo (el Super Art de Chun-Li), no
--- a un proyectil como parry_fireball.lua. Probabilidad baja a propósito: si
--- falla, Ken se come el golpe entero sin bloquear nada, mucho peor que el
--- bloqueo normal (que es confiable). La mayoría de las veces Block.decide()
--- sigue manejando esto (ver decide.lua) — esto es un intento ocasional
--- encima, no un reemplazo.
+-- Occasional melee parry attempt. Evo Moment 37 was exactly this — a parry
+-- against a melee combo (Chun-Li's Super Art), not a projectile like
+-- parry_fireball.lua. Low probability on purpose: if it fails, Ken eats the
+-- hit clean without blocking at all, much worse than the normal block
+-- (which is reliable). Most of the time Block.decide() still handles this
+-- (see decide.lua) — this is an occasional attempt on top, not a
+-- replacement.
 --
--- Dirección del parry: adelante para golpes altos/medios, abajo para
--- bajos. Aproximamos "bajo" mirando si el rival está agachado (la mayoría
--- de los barridos/golpes bajos son movimientos agachados) — no es
--- perfecto, pero es razonable.
+-- Parry direction: forward for high/mid hits, down for low ones. We
+-- approximate "low" by checking whether the opponent is crouching (most
+-- sweeps/low hits are crouching moves) — not perfect, but reasonable.
 
 ParryMelee = {}
 
@@ -36,7 +35,7 @@ function ParryMelee.decide(input)
   end
 
   if math.random() >= ATTEMPT_CHANCE then
-    return false -- esta vez que bloquee Block, no lo intentamos
+    return false -- let Block handle it this time, we don't attempt it
   end
 
   if opponent_state.posture == Memory.POSTURE.CROUCHING then

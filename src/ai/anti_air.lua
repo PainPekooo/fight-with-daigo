@@ -1,55 +1,55 @@
--- Primera regla de IA: anti-air reactivo.
--- Si el rival entra en postura de salto y está a corta distancia horizontal,
--- Ken responde con un shoryuken (623+P). El umbral de distancia es un
--- parámetro nuestro para ajustar a mano, no un dato sacado de ninguna
--- fuente sobre Daigo.
+-- First AI rule: reactive anti-air.
+-- If the opponent enters a jump posture at close horizontal range, Ken
+-- responds with a shoryuken (623+P). The distance threshold is a parameter
+-- we set by hand, not a value sourced from anything about Daigo.
 
 AntiAir = {}
 
-local ANTI_AIR_RANGE = 90 -- distancia horizontal (en unidades de pos_x) para reaccionar
+local ANTI_AIR_RANGE = 90 -- horizontal distance (in pos_x units) to react
 
--- Secuencia de shoryuken (623+P): adelante, abajo, abajo-adelante+HP.
--- (El primer intento tenía el orden invertido — 236 es hadouken, no
--- shoryuken; de ahí que saliera fireball en vez de dragon punch.)
+-- Shoryuken sequence (623+P): forward, down, down-forward+HP.
+-- (The first attempt had the order reversed — 236 is hadouken, not
+-- shoryuken; that's why a fireball came out instead of a dragon punch.)
 local SRK_SEQUENCE_FRAMES = 3
 local srk_step = 0
 
--- Enfriamiento después de tirar el shoryuken: sin esto, si el salto del
--- rival sigue en rango cuando termina la secuencia de 3 frames, se
--- retrigger inmediatamente y puede tirar varios shoryukens seguidos por un
--- solo salto, incluso mientras Ken sigue en animación del anterior. El
--- valor es una estimación nuestra (no un dato de framedata verificado) para
--- cubrir ejecución + recovery del movimiento.
+-- Cooldown after throwing the shoryuken: without this, if the opponent's
+-- jump is still in range when the 3-frame sequence ends, it retriggers
+-- immediately and can throw out several shoryukens in a row for a single
+-- jump, even while Ken is still in the previous one's animation. The value
+-- is our own estimate (not verified framedata) to cover execution +
+-- recovery of the move.
 local COOLDOWN_FRAMES = 45
 local cooldown = 0
 
--- Delay aleatorio antes de arrancar la secuencia, para que no reaccione
--- siempre en el frame exacto en que el rival salta (se ve robótico). No es
--- un dato de tiempo de reacción humano verificado, es un rango razonable
--- para que se note variación sin perder el anti-air por completo.
+-- Random delay before starting the sequence, so it doesn't always react on
+-- the exact frame the opponent jumps (looks robotic). Not a verified human
+-- reaction-time figure, just a reasonable range so variation shows without
+-- losing the anti-air entirely.
 local REACTION_DELAY_MIN = 2
 local REACTION_DELAY_MAX = 6
 local pending_delay = nil
 
--- Variedad: no siempre HP (el más vistoso/fuerte, con más golpes de
--- efecto). LP y MP también son shoryuken válido, solo cambia el botón.
+-- Variety: not always HP (the flashiest/strongest, with the most hits).
+-- LP and MP are also a valid shoryuken, only the button changes.
 local PUNCH_OPTIONS = { "P2 Weak Punch", "P2 Medium Punch", "P2 Strong Punch" }
 local current_punch = nil
 
--- Variedad más importante: no siempre shoryuken. Un DP repetido siempre es
--- 100% predecible (se puede air-parry con certeza sabiendo que va a salir)
--- y arriesgado si falla (recovery largo, whiff punishable). A veces usamos
--- un anti-air normal (st.HP) en vez del especial — más seguro, menos
--- vistoso, pero rompe el patrón. Conecta con lo investigado sobre el
--- "Ume-Shoryu": una apuesta calculada, no un reflejo garantizado.
+-- More important variety: not always shoryuken. A repeated DP is always
+-- 100% predictable (can be air-parried with certainty, knowing it's
+-- coming) and risky if it whiffs (long recovery, whiff punishable).
+-- Sometimes we use a normal anti-air (st.HP) instead of the special —
+-- safer, less flashy, but breaks the pattern. Ties into the research on
+-- the "Ume-Shoryu": a calculated gamble, not a guaranteed reflex.
 local SRK_CHANCE = 0.6
 
--- EX shoryuken (2 puños en vez de 1) cuando hay barra de meter — más daño e
--- invencibilidad extra. No siempre, para no gastar meter en cualquier salto.
+-- EX shoryuken (2 punches instead of 1) when there's meter available —
+-- more damage and extra invincibility. Not always, so we don't burn meter
+-- on every jump.
 local EX_CHANCE = 0.3
 
--- Devuelve true si tomó el frame (el orquestador no debe dejar que otra
--- regla de IA pise este input).
+-- Returns true if it took the frame (the orchestrator must not let another
+-- AI rule override this input).
 function AntiAir.decide(input)
   if cooldown > 0 then
     cooldown = cooldown - 1
@@ -80,8 +80,8 @@ function AntiAir.decide(input)
     pending_delay = nil
 
     if math.random() >= SRK_CHANCE then
-      -- anti-air normal en vez de shoryuken: un solo frame de HP alcanza,
-      -- no hace falta secuencia de motion.
+      -- normal anti-air instead of shoryuken: a single HP frame is enough,
+      -- no motion sequence needed.
       input["P2 Strong Punch"] = true
       cooldown = COOLDOWN_FRAMES
       return true

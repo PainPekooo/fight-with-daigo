@@ -1,17 +1,17 @@
--- Salto ofensivo: salta hacia adelante y tira una patada en el aire. El
--- delay antes de pegar el golpe es una aproximación nuestra (no verificada
--- contra frame data real) para que caiga más o menos a media altura del
--- salto — no calculamos la altura real.
+-- Offensive jump: jumps forward and throws a kick in the air. The delay
+-- before throwing the hit is our own approximation (not verified against
+-- real frame data) so it lands roughly at mid-jump height — we don't
+-- compute the actual height.
 --
--- A diferencia de dash.lua/tatsumaki.lua, esto deja a Ken en el aire varios
--- frames — footsies.lua tiene que permitirle seguir actuando mientras esté
--- activo aunque su propia postura sea "saltando" (el chequeo normal de "no
--- hacer nada si estoy en el aire" es para saltos NO buscados, no para este).
+-- Unlike dash.lua/tatsumaki.lua, this leaves Ken in the air for several
+-- frames — footsies.lua has to let it keep acting while active even though
+-- its own posture is "jumping" (the normal check for "do nothing if I'm in
+-- the air" is meant for jumps we didn't cause, not this one).
 
 JumpIn = {}
 
-local JUMP_INPUT_FRAMES = 3   -- cuántos frames sostener arriba+adelante
-local ATTACK_DELAY_FRAMES = 20 -- espera antes de tirar el golpe aéreo
+local JUMP_INPUT_FRAMES = 3   -- how many frames to hold up+forward
+local ATTACK_DELAY_FRAMES = 20 -- wait before throwing the air hit
 
 local phase = "idle" -- "idle" | "jumping" | "waiting" | "attacking"
 local step = 0

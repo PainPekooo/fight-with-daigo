@@ -1,41 +1,41 @@
--- Direcciones de memoria para Street Fighter III: 3rd Strike
--- ROM objetivo: sfiii3nr1 (Japan 990512), emulador FBNeo / Fightcade v2.0.91
+-- Memory addresses for Street Fighter III: 3rd Strike
+-- Target ROM: sfiii3nr1 (Japan 990512), FBNeo / Fightcade v2.0.91 emulator
 --
--- Estas direcciones describen dónde vive cada dato mientras el juego corre
--- en el emulador (son observaciones externas sobre el estado en RAM, no
--- código ni assets del juego). La investigación de varias de estas direcciones
--- se apoyó como referencia en el mapeo público hecho por el proyecto
--- 3rd_training_lua de Grouflon (https://github.com/Grouflon/3rd_training_lua);
--- esta implementación es propia.
+-- These addresses describe where each piece of data lives while the game
+-- runs in the emulator (they're external observations about the RAM state,
+-- not game code or assets). Research into several of these addresses used
+-- as reference the public mapping done by Grouflon's 3rd_training_lua
+-- project (https://github.com/Grouflon/3rd_training_lua); this
+-- implementation is original.
 
--- Definido como tabla global (no `local ... return`): main.lua carga este
--- archivo con dofile() por ruta absoluta, así que no hay un valor de retorno
--- que capturar — se comparte estado por variable global, como hace el resto
--- de los scripts de este emulador.
+-- Defined as a global table (no `local ... return`): main.lua loads this
+-- file with dofile() by absolute path, so there's no return value to
+-- capture — state is shared via a global variable, like the rest of this
+-- emulator's scripts do.
 Memory = {}
 local M = Memory
 
--- Bases de objeto de jugador. Todos los PLAYER_OFFSETS son relativos a esto.
+-- Player object bases. All PLAYER_OFFSETS are relative to this.
 M.PLAYER_BASE = {
   [1] = 0x02068C6C,
   [2] = 0x02069104,
 }
 
--- Offsets dentro del struct de un jugador (relativos a PLAYER_BASE[n])
+-- Offsets inside a player's struct (relative to PLAYER_BASE[n])
 M.PLAYER_OFFSETS = {
   pos_x          = { addr = 0x64,  type = "word_s" },
   pos_y          = { addr = 0x68,  type = "word_s" },
   char_id        = { addr = 0x3C0, type = "word" },
   life           = { addr = 0x9F,  type = "byte" },
   posture        = { addr = 0x20E, type = "byte" },
-  action_state   = { addr = 0xAC,  type = "dword" }, -- estado de animación actual
+  action_state   = { addr = 0xAC,  type = "dword" }, -- current animation state
   recovery_time  = { addr = 0x187, type = "byte" },
-  freeze_frames  = { addr = 0x45,  type = "byte" },  -- hitstop restante
+  freeze_frames  = { addr = 0x45,  type = "byte" },  -- remaining hitstop
   input_capacity = { addr = 0x46C, type = "word" },
-  flip_x         = { addr = 0x0A,  type = "byte_s" }, -- sprite mira a la izquierda por defecto
+  flip_x         = { addr = 0x0A,  type = "byte_s" }, -- sprite faces left by default
 }
 
--- Valores conocidos del campo "posture"
+-- Known values for the "posture" field
 M.POSTURE = {
   STANDING      = 0x00,
   WALK_BACK     = 0x08,
@@ -48,17 +48,17 @@ M.POSTURE = {
   KNOCKED_DOWN  = 0x26,
 }
 
--- Direcciones globales (no dependen del jugador)
+-- Global addresses (not per-player)
 M.GLOBAL = {
   frame_number = 0x02007F00, -- dword
-  match_state  = 0x020154A7, -- byte, 0x02 = ronda en curso
+  match_state  = 0x020154A7, -- byte, 0x02 = round in progress
 }
 
--- Punteros fijos por jugador que no forman parte del struct base
+-- Fixed per-player pointers that aren't part of the base struct
 M.PLAYER_FIXED = {
   [1] = {
-    gauge       = 0x020695B5, -- super meter, barras llenas
-    meter_count = 0x020695BF, -- super meter, progreso de la barra actual
+    gauge       = 0x020695B5, -- super meter, full bars
+    meter_count = 0x020695BF, -- super meter, progress within the current bar
     stun_max    = 0x020695F7,
     parry = {
       forward = { validity = 0x02026335, cooldown = 0x02025731 },
@@ -80,11 +80,11 @@ M.PLAYER_FIXED = {
   },
 }
 
--- Direcciones de la pantalla de selección de personaje.
--- row/col: posición en la grilla. color: paleta elegida. state: fase del
--- flujo de selección (0=fuera, 1..5 avanzando hasta bloqueado).
--- state == 4 es la fase de selección de Super Art. sa guarda el índice
--- elegido (0..2 = SA1..SA3).
+-- Character select screen addresses.
+-- row/col: position in the grid. color: chosen palette. state: phase of
+-- the select flow (0=out, 1..5 progressing until locked in).
+-- state == 4 is the Super Art select phase. sa holds the chosen index
+-- (0..2 = SA1..SA3).
 M.PLAYER_SELECT = {
   [1] = {
     row   = 0x020154CF,
@@ -113,15 +113,15 @@ function M.read_select_state(player_id)
   }
 end
 
--- Verificado en vivo con RAM watch: seleccionar a Ken en la grilla y quedarse
--- en el traje blanco durante un combate real (no en el portrait fijo de la
--- pantalla de Super Art, que no refleja el traje elegido).
+-- Verified live with RAM watch: selecting Ken on the grid and staying on
+-- the white gi during a real match (not on the fixed portrait of the
+-- Super Art select screen, which doesn't reflect the chosen costume).
 M.KEN_SELECT = { row = 0, col = 2 }
 
--- SA3 (Shippu Jinraikyaku): la que usó Daigo Umehara en Evo Moment 37
+-- SA3 (Shippu Jinraikyaku): the one Daigo Umehara used at Evo Moment 37
 -- (https://en.wikipedia.org/wiki/Evo_Moment_37).
--- Mapeo SA1=0,SA2=1,SA3=2 confirmado seleccionando SA3 a mano (se vio sa:2
--- en el overlay). Ver character_select.lua para el forzado automático.
+-- Mapping SA1=0,SA2=1,SA3=2 confirmed by selecting SA3 by hand (sa:2 was
+-- seen on the overlay). See character_select.lua for the automatic forcing.
 M.KEN_DEFAULT_SA = 2
 M.KEN_WHITE_GI_COLOR = 5
 
@@ -130,7 +130,7 @@ M.CHARACTERS = {
   "oro", "yang", "ken", "sean", "urien", "gouki", "gill", "chunli", "makoto",
   "q", "twelve", "remy",
 }
-M.KEN_CHAR_ID = 11 -- índice 0-based dentro de CHARACTERS ("ken")
+M.KEN_CHAR_ID = 11 -- 0-based index within CHARACTERS ("ken")
 
 local READERS = {
   byte   = function(addr) return memory.readbyte(addr) end,
@@ -142,9 +142,9 @@ local READERS = {
 
 function M.read_player_field(player_id, field_name)
   local offset_def = M.PLAYER_OFFSETS[field_name]
-  assert(offset_def, "campo desconocido: " .. tostring(field_name))
+  assert(offset_def, "unknown field: " .. tostring(field_name))
   local base = M.PLAYER_BASE[player_id]
-  assert(base, "player_id inválido: " .. tostring(player_id))
+  assert(base, "invalid player_id: " .. tostring(player_id))
   return READERS[offset_def.type](base + offset_def.addr)
 end
 
@@ -169,18 +169,18 @@ function M.is_round_active()
   return memory.readbyte(M.GLOBAL.match_state) == 0x02
 end
 
--- Offset de la lista de hitboxes de ataque dentro del struct de jugador
--- (mismo mecanismo que usa 3rd_training_lua para dibujar hitboxes en
--- pantalla). Hasta 4 boxes de 8 bytes cada uno (left, width, bottom,
--- height, 2 bytes cada campo); un box en 0,0,0,0 significa "vacío".
+-- Offset of the attack hitbox list inside a player's struct (same
+-- mechanism 3rd_training_lua uses to draw hitboxes on screen). Up to 4
+-- boxes of 8 bytes each (left, width, bottom, height, 2 bytes per field);
+-- a box at 0,0,0,0 means "empty".
 local ATTACK_BOXES_OFFSET = 0x2C8
 local ATTACK_BOXES_COUNT = 4
 
--- Lee la primera hitbox de ataque activa de un "game object" (jugador o
--- proyectil — el juego usa el mismo struct para los dos, por eso funciona
--- igual para ambos). Devuelve nil si no hay ninguna activa, o
--- {left, width, bottom, height} si la hay (relativo a la posición del
--- objeto).
+-- Reads the first active attack hitbox of a "game object" (player or
+-- projectile — the game uses the same struct for both, which is why this
+-- works the same for either). Returns nil if none is active, or
+-- {left, width, bottom, height} if there is one (relative to the object's
+-- position).
 function M.read_attack_box(object_base)
   local list_base = memory.readdword(object_base + ATTACK_BOXES_OFFSET)
   if list_base == 0 then
@@ -201,10 +201,9 @@ function M.read_attack_box(object_base)
   return nil
 end
 
--- true si el jugador tiene una hitbox de ataque activa en este momento (o
--- sea, está en medio de un golpe que puede conectar ahora mismo) — a
--- diferencia de mirar distancia, esto no depende de adivinar el alcance de
--- cada movimiento.
+-- true if the player has an active attack hitbox right now (i.e. is in
+-- the middle of a hit that can connect this instant) — unlike checking
+-- distance, this doesn't depend on guessing each move's reach.
 function M.has_active_attack_box(player_id)
   return M.read_attack_box(M.PLAYER_BASE[player_id]) ~= nil
 end

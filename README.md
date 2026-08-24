@@ -1,106 +1,110 @@
 # Fight with Daigo
 
-Mod para **Street Fighter III: 3rd Strike** (Fightcade v2.0.91 / FBNeo, ROM `sfiii3nr1` "Japan 990512").
+A mod for **Street Fighter III: 3rd Strike** (Fightcade v2.0.91 / FBNeo, ROM `sfiii3nr1` "Japan 990512").
 
-Un script Lua que, en modo dos jugadores, controla a P2 como Ken (traje blanco)
-mediante un bot basado en reglas que lee el estado del juego en RAM y decide
-inputs frame a frame. No es un modelo entrenado por machine learning.
+A Lua script that, in two-player mode, controls P2 as Ken (white gi) via a
+rule-based bot that reads the game state from RAM and decides inputs frame
+by frame. It's not a machine-learning-trained model.
 
-**Sobre el nombre y el estado actual — para ser honestos:** la base es un bot
-de fundamentos genéricos de fighting games (anti-air, bloqueo, zafar agarres,
-footsies) — no un modelo entrenado con datos reales de Daigo. Encima de eso
-hicimos una investigación real (entrevistas, su libro, análisis de la escena
-FGC) buscando tendencias documentadas suyas y no genéricas. Resultado:
+**About the name and the current state — being honest about it:** the base
+is a bot built on generic fighting-game fundamentals (anti-air, blocking,
+throw tech, footsies) — not a model trained on real data about how Daigo
+plays. On top of that we did actual research (interviews, his book, FGC
+scene analysis) looking for documented tendencies of his, not generic ones.
+Result:
 
-- Verificado con cita directa: [Evo Moment 37](https://en.wikipedia.org/wiki/Evo_Moment_37)
-  (jugaba Ken, paró el Super Art de Chun-Li con parry, remató con SA3/Shippu
-  Jinraikyaku en ese partido puntual — no hay fuente de que sea su elección
-  por defecto en general).
-- Verificado con cita directa: juega priorizando lecturas y whiff-punish por
-  sobre reaccionar por reflejo ([EventHubs, 2023](https://www.eventhubs.com/news/2023/may/14/daigo-umehara-analyzes-wins-sf6/)),
-  perfila al rival en los primeros segundos del match ([EventHubs, 2018](https://www.eventhubs.com/news/2018/may/01/chris-tatarian-sits-down-daigo-umehara-discuss-short-sets-dealing-pressure-ume-shoryu-and-more/)),
-  y el "Ume-Shoryu" (tirar el reversal como apuesta calculada, no reflejo
-  garantizado) es un fenómeno con nombre propio en la escena FGC, mismo enlace.
-- Sin fuente encontrada: qué normal prefiere en footsies, preferencia de botón
-  para anti-air, o una SA "por defecto" con Ken fuera de Evo Moment 37.
+- Verified with a direct citation: [Evo Moment 37](https://en.wikipedia.org/wiki/Evo_Moment_37)
+  (he played Ken, parried Chun-Li's Super Art, finished with SA3/Shippu
+  Jinraikyaku in that specific match — there's no source saying that's his
+  default pick in general).
+- Verified with direct citations: he plays prioritizing reads and
+  whiff-punishing over reacting on reflex ([EventHubs, 2023](https://www.eventhubs.com/news/2023/may/14/daigo-umehara-analyzes-wins-sf6/)),
+  profiles the opponent within the first seconds of a match ([EventHubs, 2018](https://www.eventhubs.com/news/2018/may/01/chris-tatarian-sits-down-daigo-umehara-discuss-short-sets-dealing-pressure-ume-shoryu-and-more/)),
+  and the "Ume-Shoryu" (throwing out a reversal as a calculated gamble, not
+  a guaranteed reflex) is a named phenomenon in the FGC scene, same source.
+- No source found: which normal he prefers in footsies, button preference
+  for anti-airs, or a "default" SA for Ken outside of Evo Moment 37.
 
-Con esto, el `anti_air.lua` y `block.lua` tienen ahora un delay aleatorio
-antes de reaccionar (en vez de reaccionar siempre en el frame exacto), como
-primer paso hacia "lee y decide" en vez de "gatillo fijo" — todavía lejos de
-modelar reads/perfilado de rival de verdad, que quedó pendiente.
+With that in mind, `anti_air.lua` and `block.lua` now have a random delay
+before reacting (instead of always reacting on the exact frame), as a first
+step toward "read and decide" instead of "fixed trigger" — still far from
+actually modeling reads/opponent profiling, which remains a TODO.
 
-## Estado del proyecto
+## Project status
 
-Funcional como prototipo. P2 se auto-selecciona (Ken, traje blanco, SA3) sin
-tocar el control. Durante el combate:
+Functional as a prototype. P2 auto-selects itself (Ken, white gi, SA3)
+without touching the controller. During the match:
 
-- Anti-air reactivo: shoryuken (LP/MP/HP al azar, EX si hay meter) el 60% de
-  las veces, anti-air normal (st.HP) el resto — para no ser 100% predecible
-  ni air-parryable siempre — con cooldown y delay aleatorio.
-- Bloqueo cuerpo a cuerpo (por hitbox de ataque real, no distancia) y contra
-  hadoukens (lee la lista de proyectiles), con intento de parry antes de
-  bloquear (siempre contra proyectiles; ocasional — 18% — contra golpes
-  cuerpo a cuerpo, el guiño a Evo Moment 37, con Block de respaldo si falla).
-- Zafar agarres a distancia de agarre, variando entre agarre neutral y
-  agarre hacia atrás (cruza al rival de lado) para no ser predecible en
-  despertar.
-- **Whiff punish**: castiga al rival apenas queda en recovery, con un combo
-  (cr.MK cancelado en Super Art si hay meter, o en shoryuken si no) en vez
-  de un solo golpe — la única regla basada en la investigación real sobre
-  Daigo (ver arriba), no en fundamentos genéricos. El timing de la
-  cancelación (`combo_punish.lua`) todavía no está confirmado en vivo — no
-  sabemos con certeza si conecta como combo real o como 2 golpes separados.
-- Footsies: cierra distancia (caminando, dash, tatsumaki, salto ofensivo o
-  manteniendo distancia al azar — no siempre en línea recta hacia adelante)
-  y pokea (cr.MK / cr.MP / st.MP al azar) cuando el rival entra en rango,
-  con retroceso ocasional después de pokear.
+- Reactive anti-air: shoryuken (random LP/MP/HP, EX if there's meter) 60%
+  of the time, a normal anti-air (st.HP) the rest — so it's not 100%
+  predictable or always air-parryable — with cooldown and a random delay.
+- Melee blocking (based on a real attack hitbox, not distance) and blocking
+  against hadoukens (reads the projectile list), with a parry attempt
+  before blocking (always against projectiles; occasional — 18% — against
+  melee hits, the nod to Evo Moment 37, with Block as a fallback if it
+  fails).
+- Throw tech at grab range, alternating between a neutral throw and a back
+  throw (crosses the opponent to the other side) to avoid being predictable
+  on wake-up.
+- **Whiff punish**: punishes the opponent the instant they enter recovery,
+  with a combo (cr.MK canceled into Super Art if there's meter, or into
+  shoryuken if not) instead of a single hit — the only rule based on real
+  research about Daigo (see above), not on generic fundamentals. The
+  cancel timing (`combo_punish.lua`) still isn't confirmed live — we don't
+  know for sure whether it connects as a real combo or as two separate
+  hits.
+- Footsies: closes the distance (walking, dashing, tatsumaki, offensive
+  jump, or holding ground at random — not always a straight line forward)
+  and pokes (random cr.MK / cr.MP / st.MP) when the opponent enters range,
+  with an occasional step back after poking.
 
-Pendiente: modelar reads/perfilado de rival de verdad (más allá del delay de
-reacción y el whiff punish), más investigación de fuentes reales sobre Daigo
-para reemplazar los parámetros genéricos que quedan, y un easter egg: parry
-garantizado si el rival es Chun-Li y tira su SA2 (Houyoku Sen, Evo Moment 37).
-Candidato encontrado en el framedata de Chun-Li (move id `5f54`, 17 ventanas
-de golpe en 121 frames — encaja con el perfil) pero sin confirmar en vivo
-todavía.
+TODO: actually model reads/opponent profiling (beyond the reaction delay
+and whiff punish), more research into real sources about Daigo to replace
+the generic parameters that remain, and an easter egg: guaranteed parry if
+the opponent is Chun-Li and throws her SA2 (Houyoku Sen, Evo Moment 37). A
+candidate was found in Chun-Li's framedata (move id `5f54`, 17 hit windows
+across 121 frames — matches the profile) but it's not confirmed live yet.
 
-## Requisitos
+## Requirements
 
-- Fightcade v2.0.91 (o el cliente que use el mismo build de FBNeo)
-- ROM legítima de `sfiii3nr1` (Japan 990512) — **no se distribuye acá, conseguila vos**
-- Lua Scripting habilitado en el emulador
+- Fightcade v2.0.91 (or a client running the same FBNeo build)
+- A legitimate `sfiii3nr1` (Japan 990512) ROM — **not distributed here, get
+  your own**
+- Lua Scripting enabled in the emulator
 
-## Estructura
+## Structure
 
 ```
 src/
-  main.lua           -- punto de entrada, carga todo lo demás y corre el loop principal
-  memory.lua         -- direcciones de memoria y lectura de estado de jugador
-  projectiles.lua    -- lectura de la lista de proyectiles activos
-  character_select.lua -- fuerza a P2 = Ken (traje blanco, SA3)
+  main.lua           -- entry point, loads everything else and runs the main loop
+  memory.lua         -- memory addresses and player state reading
+  projectiles.lua    -- reads the list of active projectiles
+  character_select.lua -- forces P2 = Ken (white gi, SA3)
   ai/
-    decide.lua       -- orquestador: prioridad entre las reglas de abajo
-    util.lua          -- helpers compartidos (postura de salto, direcciones)
-    anti_air.lua      -- shoryuken reactivo
-    block.lua         -- bloqueo cuerpo a cuerpo (hitbox real) y proyectiles
-    parry_fireball.lua -- intento de parry antes de que Block bloquee un proyectil
-    parry_melee.lua   -- intento ocasional de parry cuerpo a cuerpo (Evo Moment 37)
-    throw_tech.lua    -- zafar agarres
-    super_art.lua     -- Super Art 3 (Shippu Jinraikyaku), usado por combo_punish
-    combo_punish.lua  -- cr.MK cancelado en especial/Super Art, usado por whiff_punish
-    whiff_punish.lua  -- castiga al rival en recovery
-    tatsumaki.lua     -- hurricane kick, usado para cerrar distancia
-    dash.lua          -- dash hacia adelante, usado para cerrar distancia
-    jump_in.lua       -- salto ofensivo, usado para cerrar distancia
-    footsies.lua      -- caminar/pokear en rango medio, orquesta el acercamiento
+    decide.lua       -- orchestrator: priority between the rules below
+    util.lua          -- shared helpers (jump posture, directions)
+    anti_air.lua      -- reactive shoryuken
+    block.lua         -- melee blocking (real hitbox) and projectiles
+    parry_fireball.lua -- parry attempt before Block blocks a projectile
+    parry_melee.lua   -- occasional melee parry attempt (Evo Moment 37)
+    throw_tech.lua    -- throw tech
+    super_art.lua     -- Super Art 3 (Shippu Jinraikyaku), used by combo_punish
+    combo_punish.lua  -- cr.MK canceled into special/Super Art, used by whiff_punish
+    whiff_punish.lua  -- punishes the opponent on recovery
+    tatsumaki.lua     -- hurricane kick, used to close distance
+    dash.lua          -- forward dash, used to close distance
+    jump_in.lua       -- offensive jump, used to close distance
+    footsies.lua      -- walk/poke at mid range, orchestrates the approach
 ```
 
-## Créditos
+## Credits
 
-La investigación de varias direcciones de memoria usadas acá tomó como referencia
-el trabajo público de [Grouflon/3rd_training_lua](https://github.com/Grouflon/3rd_training_lua).
-El código de este repo es una implementación propia, no una copia.
+The research into several of the memory addresses used here took as
+reference the public work of [Grouflon/3rd_training_lua](https://github.com/Grouflon/3rd_training_lua).
+The code in this repo is an original implementation, not a copy.
 
-## Aviso legal
+## Legal notice
 
-Este proyecto no incluye ni distribuye ROMs ni assets protegidos del juego.
-Es un mod/herramienta de terceros para uso personal con una copia legítima del juego.
+This project does not include or distribute ROMs or protected game assets.
+It's a third-party mod/tool for personal use with a legitimate copy of the
+game.

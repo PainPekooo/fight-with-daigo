@@ -1,39 +1,38 @@
--- Orquestador de IA: llama a cada regla en orden de prioridad.
--- AntiAir es exclusivo en sus frames activos (mezclar otro input rompe la
--- secuencia de shoryuken). ParryFireball y ParryMelee también: si tocan
--- "adelante"/"abajo" ese frame, no deben mezclarse con el "atrás" del
--- bloqueo. ParryMelee solo actúa una fracción de las veces (ver el archivo)
--- — el resto de las veces devuelve false y Block sigue de respaldo.
+-- AI orchestrator: calls each rule in priority order.
+-- AntiAir is exclusive during its active frames (mixing in another input
+-- breaks the shoryuken sequence). Same for ParryFireball and ParryMelee: if
+-- they tap "forward"/"down" that frame, it must not mix with Block's
+-- "backward". ParryMelee only acts a fraction of the time (see the file) —
+-- the rest of the time it returns false and Block stays as the fallback.
 --
--- Block va antes que Footsies: si hay una amenaza real (golpe activo del
--- rival o un proyectil acercándose), bloquear siempre gana. Como Block ya
--- no depende de distancia para el caso cuerpo a cuerpo (lee si el rival
--- tiene una hitbox de ataque activa, ver block.lua), esto no reintroduce el
--- bug viejo de "Ken bloqueando todo el partido": si el rival está cerca
--- pero no atacando, Block.has_threat() da false y Footsies puede
--- caminar/pokear tranquilo.
+-- Block comes before Footsies: if there's a real threat (an active hit
+-- from the opponent, or an incoming projectile), blocking always wins.
+-- Since Block no longer depends on distance for the melee case (it reads
+-- whether the opponent has an active attack hitbox, see block.lua), this
+-- doesn't reintroduce the old "Ken blocks the whole match" bug: if the
+-- opponent is close but not attacking, Block.has_threat() returns false
+-- and Footsies is free to walk/poke.
 
 AI = {}
 
--- Devuelve además una etiqueta legible de qué hizo, para mostrar en
--- pantalla sin tener que volcar el estado interno de cada regla.
+-- Also returns a readable label describing what it did, to show on screen
+-- without having to dump each rule's internal state.
 function AI.decide(input)
   if AntiAir.decide(input) then return "shoryuken (anti-air)" end
   if ParryFireball.decide(input) then return "parry (hadouken)" end
-  if ParryMelee.decide(input) then return "parry (cuerpo a cuerpo)" end
+  if ParryMelee.decide(input) then return "parry (melee)" end
 
-  -- Si el combo de castigo ya está en marcha (lo arrancó WhiffPunish),
-  -- seguimos terminando su secuencia (starter + especial) antes que
-  -- cualquier otra cosa.
+  -- If the punish combo is already underway (started by WhiffPunish), keep
+  -- finishing its sequence (starter + special) before anything else.
   if ComboPunish.active() and ComboPunish.decide(input) then
     return "combo punish"
   end
 
   if Block.has_threat() then
     if Block.decide(input) then
-      return "bloqueando"
+      return "blocking"
     end
-    return "reaccionando..." -- en el delay antes de bloquear un proyectil
+    return "reacting..." -- during the delay before blocking a projectile
   end
 
   if WhiffPunish.decide(input) then return "whiff punish" end
@@ -43,8 +42,8 @@ function AI.decide(input)
   end
 
   if ThrowTech.decide(input) then
-    return "zafando agarre"
+    return "throw tech"
   end
 
-  return "neutral"
+  return "idle"
 end

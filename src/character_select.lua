@@ -1,36 +1,36 @@
--- Fuerza a P2 a elegir Ken (traje blanco) en la pantalla de selección de
--- personaje, sin necesidad de tocar el control de P2 a mano. Pensado para
--- el flujo de este proyecto: P2 es el slot que la IA va a pilotar más
--- adelante, así que no hay un jugador humano real al que pisarle el input
--- en esta pantalla.
+-- Forces P2 to pick Ken (white gi) on the character select screen, without
+-- needing to touch P2's controller by hand. Built for this project's flow:
+-- P2 is the slot the AI will pilot from here on, so there's no real human
+-- player whose input we'd be stepping on on this screen.
 --
--- La escritura de character_select_color no está confirmada como válida
--- (en el mapeo de referencia solo aparece documentada como lectura) —
--- la probamos igual por ser un byte de RAM normal; si no pega hay que
--- verlo en vivo y ajustar.
+-- Writing to character_select_color isn't confirmed to actually work (in
+-- the reference mapping it's only documented as readable) — we try it
+-- anyway since it's a normal RAM byte; if it doesn't stick, it needs to be
+-- checked live and adjusted.
 
 CharacterSelect = {}
 
 local PLAYER_ID = 2
 local OPPONENT_ID = 1
-local NO_PLAYER = 0 -- ver enum en memory.lua (PLAYER_SELECT.state)
+local NO_PLAYER = 0 -- see enum in memory.lua (PLAYER_SELECT.state)
 local CHARACTER_SELECT_PHASE = 2
 local SA_SELECT_PHASE = 4
 
--- El primer intento de forzar la SA (con y sin delay antes de confirmar)
--- terminó bloqueando SA2 en vez de KEN_DEFAULT_SA. En su momento pensamos que
--- era la dirección siendo de solo lectura, pero en realidad el "Weak Punch"
--- usado para confirmar a Ken en CHARACTER_SELECT_PHASE quedaba pegado en
--- true de un frame a otro (bug de inputs sin limpiar, ya arreglado en
--- main.lua) y confirmaba la SA por defecto antes de que nuestro delay
--- llegara a actuar. Reintentamos ahora que ese bug está resuelto.
+-- The first attempt to force the SA (with and without a delay before
+-- confirming) ended up locking in SA2 instead of KEN_DEFAULT_SA. At the
+-- time we thought the address was read-only, but it was actually the
+-- "Weak Punch" used to confirm Ken in CHARACTER_SELECT_PHASE getting stuck
+-- true from one frame to the next (an input-clearing bug, already fixed in
+-- main.lua), confirming the default SA before our delay got a chance to
+-- act. Retrying now that bug is fixed.
 local SA_CONFIRM_DELAY_FRAMES = 5
 local sa_select_frames = 0
 
--- Auto-unirse: mientras P2 no tenga jugador (state == 0) y P1 ya haya
--- arrancado el flujo (metió su moneda), le mandamos moneda + start a P2 en
--- vez de esperar a que alguien lo haga a mano. Sin verificar todavía si
--- hace falta el Start o si con la moneda ya alcanza — a probar en vivo.
+-- Auto-join: while P2 has no player (state == 0) and P1 has already
+-- started the flow (inserted their coin), we send coin + start to P2
+-- instead of waiting for someone to do it by hand. Not verified yet
+-- whether Start is actually needed or if the coin alone is enough — to be
+-- tested live.
 local JOIN_COIN_FRAMES = 5
 local JOIN_START_FRAMES = 5
 local join_frames = 0

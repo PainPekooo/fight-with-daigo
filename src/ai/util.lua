@@ -1,4 +1,4 @@
--- Helpers compartidos entre las reglas de IA.
+-- Helpers shared between the AI rules.
 
 AIUtil = {}
 
@@ -16,8 +16,8 @@ function AIUtil.is_jumping(posture)
   return AIUtil.JUMP_POSTURES[posture] == true
 end
 
--- Tecla de dirección "hacia el rival" según posición relativa (no usamos el
--- flag flip_x del juego, cuyo signo no tenemos verificado).
+-- Direction key "toward the opponent" based on relative position (we don't
+-- use the game's flip_x flag, whose sign we haven't verified).
 function AIUtil.forward_input(self_state, opponent_state)
   if self_state.pos_x <= opponent_state.pos_x then
     return "P2 Right"
@@ -26,7 +26,7 @@ function AIUtil.forward_input(self_state, opponent_state)
   end
 end
 
--- Tecla de dirección "alejándose del rival" (para bloquear).
+-- Direction key "away from the opponent" (for blocking).
 function AIUtil.backward_input(self_state, opponent_state)
   if self_state.pos_x <= opponent_state.pos_x then
     return "P2 Left"

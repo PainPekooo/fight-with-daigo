@@ -1,19 +1,19 @@
--- Whiff punish: a diferencia del resto del moveset (fundamentos genéricos
--- inventados por nosotros), esto sí está basado en la investigación real
--- sobre Daigo (ver README) — su fortaleza documentada es "whiff-punish over
--- reacción", no un anti-air o footsie en particular.
+-- Whiff punish: unlike the rest of the moveset (generic fighting-game
+-- fundamentals we made up ourselves), this one is actually based on real
+-- research about Daigo (see README) — his documented strength is
+-- "whiff-punishing over reacting," not any particular anti-air or footsie.
 --
--- Cuando el rival queda en recovery (falló un golpe, o simplemente quedó
--- vulnerable después de tirar algo y no conectar con nada que lo proteja),
--- Ken lo castiga en el instante con un combo (cr.MK cancelado en Super Art
--- si hay meter, o en shoryuken si no — ver combo_punish.lua), en vez de
--- esperar el enfriamiento normal de pokes de Footsies. Dispara una sola vez
--- por ventana de recovery (el flanco de subida de recovery_time), no
--- mientras dure entera.
+-- When the opponent enters recovery (whiffed a hit, or simply ended up
+-- vulnerable after throwing something out that didn't connect with
+-- anything protecting them), Ken punishes instantly with a combo (cr.MK
+-- canceled into Super Art if there's meter, or into shoryuken if not — see
+-- combo_punish.lua), instead of waiting for Footsies' normal poke pacing.
+-- Fires only once per recovery window (the rising edge of recovery_time),
+-- not for the whole duration.
 
 WhiffPunish = {}
 
-local PUNISH_RANGE = 100 -- alcance razonable para un golpe fuerte de castigo
+local PUNISH_RANGE = 100 -- reasonable reach for a strong punish hit
 local was_recovering = false
 
 function WhiffPunish.decide(input)

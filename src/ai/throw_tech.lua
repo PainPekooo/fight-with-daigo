@@ -1,24 +1,25 @@
--- Zafar de agarres: a distancia de agarre, machaca el propio input de
--- agarre (LP+LK) — es la técnica real que usan los jugadores para tech-ear
--- un throw sin necesitar detectar el agarre del rival específicamente. El
--- juego lo reconoce como intento de zafarse. De paso, si el rival no agarra,
--- esto también tira su propio agarre cuando hay ventana — variando entre
--- agarre neutral (lo tira hacia adelante, del mismo lado) y agarre hacia
--- atrás (lo cruza al otro lado de la pantalla) para no ser 100% predecible
--- en situaciones de despertar, donde machacar siempre el mismo agarre se
--- lee fácil.
+-- Throw tech: at grab range, mash the throw input itself (LP+LK) — this is
+-- the real technique players use to tech a throw without needing to detect
+-- the opponent's grab specifically. The game recognizes it as a tech
+-- attempt. As a bonus, if the opponent doesn't grab, this also throws our
+-- own grab whenever there's a window — alternating between a neutral throw
+-- (throws them forward, same side) and a back throw (crosses them to the
+-- other side of the screen) so it isn't 100% predictable on wake-up, where
+-- always mashing the same throw is easy to read.
 --
--- No reemplaza el bloqueo (Block.decide) — se aplica encima, en frames
--- alternados, para no cancelar el guard con el input de agarre sostenido.
+-- Doesn't replace blocking (Block.decide) — it's layered on top, on
+-- alternating frames, so it doesn't cancel the guard with a held throw
+-- input.
 
 ThrowTech = {}
 
--- El primer valor (30) estaba mal: era un número puesto a ojo, sin chequear
--- contra nada. En framedata.lua del repo de referencia figura el medio-ancho
--- de cada personaje (Ken = 30, el resto entre 25 y 45) — dos personajes
--- pegados de verdad quedan separados por la SUMA de esos medio-anchos, o
--- sea entre 50 y 75, no 30. Con 30 la condición casi nunca se cumplía.
--- Sigue siendo aproximado (no sabemos el medio-ancho del rival en runtime).
+-- The first value (30) was wrong: a number picked by eye, never checked
+-- against anything. The reference repo's framedata.lua lists each
+-- character's half-width (Ken = 30, the rest between 25 and 45) — two
+-- characters truly pressed together end up separated by the SUM of those
+-- half-widths, i.e. somewhere between 50 and 75, not 30. With 30 the
+-- condition almost never triggered. Still an approximation (we don't know
+-- the opponent's half-width at runtime).
 local THROW_RANGE = 55
 local PRESS_FRAMES = 2
 local RELEASE_FRAMES = 2

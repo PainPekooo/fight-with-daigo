@@ -1,9 +1,9 @@
--- Super Art 3 (Shippu Jinraikyaku): doble quarter-circle-forward + patada
--- (↓↘→↓↘→+K). Confirmado en EventHubs y coincide con la búsqueda —
--- distinto motion al shoryuken (623), no hay riesgo de repetir el error de
--- confundir 236 con 623 que tuvimos antes.
+-- Super Art 3 (Shippu Jinraikyaku): double quarter-circle-forward + kick
+-- (↓↘→↓↘→+K). Confirmed on EventHubs and matches the search results —
+-- a different motion family from the shoryuken (623), so there's no risk
+-- of repeating the earlier mistake of confusing 236 with 623.
 --
--- Se dispara desde whiff_punish.lua cuando hay barra de meter disponible.
+-- Triggered from whiff_punish.lua when there's meter available.
 
 SuperArt = {}
 

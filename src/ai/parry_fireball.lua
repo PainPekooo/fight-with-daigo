@@ -1,17 +1,17 @@
--- Parry de proyectiles, segundo intento. El primero (mash de "adelante" a
--- ciegas según distancia) fallaba siempre — no sabíamos el momento real de
--- contacto, solo que "venía cerca". Ahora que leemos la hitbox real del
--- proyectil (mismo mecanismo que usamos para el bloqueo cuerpo a cuerpo),
--- calculamos el frame exacto en que su borde entra en la zona de Ken y
--- tanteamos "adelante" ahí — dos intentos, con un frame de margen, en vez
--- de mashear a lo largo de toda la aproximación.
+-- Projectile parry, second attempt. The first one (blindly mashing
+-- "forward" based on distance) always failed — we didn't know the real
+-- moment of contact, only that "it's getting close." Now that we read the
+-- projectile's real hitbox (the same mechanism used for melee blocking),
+-- we compute the exact frame its edge enters Ken's zone and tap "forward"
+-- right there — two attempts, one frame apart, instead of mashing across
+-- the whole approach.
 --
--- No reemplaza a Block: si esto falla, Block.decide() sigue actuando como
--- red de respaldo por proximidad (ver decide.lua).
+-- Doesn't replace Block: if this fails, Block.decide() still acts as a
+-- proximity-based fallback (see decide.lua).
 
 ParryFireball = {}
 
--- De framedata.lua del repo de referencia (character_specific.ken.half_width).
+-- From the reference repo's framedata.lua (character_specific.ken.half_width).
 local KEN_HALF_WIDTH = 30
 
 local was_overlapping = false
@@ -53,9 +53,9 @@ function ParryFireball.decide(input)
   overlap_frames = was_overlapping and (overlap_frames + 1) or 0
   was_overlapping = true
 
-  -- Toca en el frame 0 (apenas empieza el solape) y en el 2 (por si el
-  -- primero llegó un poco temprano/tarde) — un frame de descanso entre
-  -- medio para que cuente como un toque nuevo, no un input sostenido.
+  -- Taps on frame 0 (right as the overlap starts) and on frame 2 (in case
+  -- the first one landed a bit early/late) — one frame of release in
+  -- between so it counts as a fresh tap, not a held input.
   if overlap_frames == 0 or overlap_frames == 2 then
     local forward = (obj.pos_x >= self_state.pos_x) and "P2 Right" or "P2 Left"
     input[forward] = true

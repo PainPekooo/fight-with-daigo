@@ -1,25 +1,27 @@
--- Bloqueo reactivo, dos casos:
--- 1) Cuerpo a cuerpo: el rival tiene una hitbox de ataque activa ahora mismo
---    (Memory.has_active_attack_box) -> agacha y bloquea hacia atrás. Ya NO
---    usa distancia: antes usábamos un rango fijo (BLOCK_RANGE) que era puro
---    adivine — muy chico y los barridos conectaban sin que Ken se
---    considerara "cerca"; agrandarlo tampoco alcanzaba porque Footsies
---    caminaba a través de esa zona sin que Block llegara a mirar nada, y
---    dárselo a Block por delante hacía que Ken se quedara bloqueando para
---    siempre apenas el rival estaba cerca (aunque no atacara). Leer la
---    hitbox real resuelve las dos cosas: no depende de un número de rango,
---    y no se activa solo por estar cerca sin pelear.
--- 2) Proyectil: si hay un hadouken del rival acercándose, bloquea sin
---    importar la distancia (esto sí sigue por proximidad — no hay hitbox de
---    ataque que leer en el objeto del jugador para un proyectil).
+-- Reactive blocking, two cases:
+-- 1) Melee: the opponent has an active attack hitbox right now
+--    (Memory.has_active_attack_box) -> crouch and block backward. No
+--    longer uses distance: we used to use a fixed range (BLOCK_RANGE) that
+--    was pure guesswork — too small and sweeps connected without Ken
+--    considering himself "close"; widening it wasn't enough either because
+--    Footsies would walk straight through that zone without Block ever
+--    getting a look, and giving Block priority instead made Ken stand
+--    there blocking forever as soon as the opponent was close (even if not
+--    attacking). Reading the real hitbox solves both problems: it doesn't
+--    depend on a range number, and it doesn't trigger just from being
+--    close without actually fighting.
+-- 2) Projectile: if there's an opponent hadouken incoming, block
+--    regardless of distance (this one still goes by proximity — there's no
+--    attack hitbox to read on a projectile object).
 --
--- El bloqueo de golpe activo es sin delay (el golpe ya está saliendo, no
--- hay margen para simular tiempo de reacción). El de proyectil sí tiene
--- delay aleatorio (viene de lejos, hay margen de sobra).
+-- Blocking an active hit has no delay (the hit is already coming out,
+-- there's no room to simulate reaction time). Blocking a projectile does
+-- have a random delay (it's coming from far away, there's plenty of
+-- margin).
 
 Block = {}
 
-local PROJECTILE_RANGE = 180 -- distancia para reaccionar a un proyectil acercándose
+local PROJECTILE_RANGE = 180 -- distance to react to an incoming projectile
 
 local REACTION_DELAY_MIN = 2
 local REACTION_DELAY_MAX = 5
@@ -41,9 +43,9 @@ local function nearest_incoming_projectile(self_state)
   return nearest, nearest_dist
 end
 
--- Chequeo sin efectos secundarios: para que el orquestador le dé prioridad
--- al bloqueo por sobre Footsies (caminar/pokear en vez de bloquear un golpe
--- real es peor que perderse un frame de ofensiva).
+-- Side-effect-free check: so the orchestrator can give blocking priority
+-- over Footsies (walking/poking instead of blocking a real hit is worse
+-- than missing a frame of offense).
 function Block.has_threat()
   local self_state = Memory.read_player_state(AIUtil.SELF_ID)
 

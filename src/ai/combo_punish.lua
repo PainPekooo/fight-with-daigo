@@ -1,27 +1,27 @@
--- Combo de castigo: cr.MK cancelado en Super Art (si hay meter) o en
--- shoryuken (si no). Se dispara desde whiff_punish.lua en vez de un golpe
--- suelto.
+-- Punish combo: cr.MK canceled into Super Art (if there's meter) or into
+-- shoryuken (if not). Triggered from whiff_punish.lua instead of a single
+-- hit.
 --
--- Primer intento salió separado (bloqueable en el medio): arrancábamos el
--- motion del especial apenas se soltaba el botón de cr.MK (frame 3), pero
--- en el framedata real de Ken (data/sfiii3nr1/framedata/ken_framedata.json
--- del repo de referencia) cr.MK (move id "b0e8") recién se vuelve activa —
--- puede conectar, y ahí es cuando se puede cancelar — entre los frames 6 y
--- 10 de su animación. Ahora esperamos hasta ese punto antes de arrancar el
--- motion. Sigue siendo una estimación (no confirmamos la ventana exacta de
--- cancelación, que no es necesariamente idéntica a hit_frames) — falta
--- reconfirmar en vivo.
+-- The first attempt came out separated (blockable in the middle): we
+-- started the special's motion right as the cr.MK button was released
+-- (frame 3), but in Ken's real framedata
+-- (data/sfiii3nr1/framedata/ken_framedata.json from the reference repo)
+-- cr.MK (move id "b0e8") only becomes active — able to connect, and that's
+-- when it can be canceled — between frames 6 and 10 of its animation. We
+-- now wait until that point before starting the motion. Still an estimate
+-- (we haven't confirmed the exact cancel window, which isn't necessarily
+-- identical to hit_frames) — needs re-confirming live.
 --
--- El motion de shoryuken de acá es una copia local, NO comparte módulo con
--- anti_air.lua a propósito: si dos llamadores reclaman el mismo módulo
--- compartido el mismo frame (ej. AntiAir se dispara mientras este combo
--- está a mitad de camino), uno le pisa el estado al otro — más simple
--- duplicar unas pocas líneas que arriesgar ese bug.
+-- The shoryuken motion here is a local copy, deliberately NOT sharing a
+-- module with anti_air.lua: if two callers claim the same shared module on
+-- the same frame (e.g. AntiAir triggers while this combo is halfway
+-- through), one stomps the other's state — simpler to duplicate a few
+-- lines than risk that bug.
 
 ComboPunish = {}
 
-local STARTER_FRAMES = 2 -- sostener Down+MK
-local WAIT_FRAMES = 4    -- esperar hasta ~frame 6 (cr.MK activa) antes de cancelar
+local STARTER_FRAMES = 2 -- hold Down+MK
+local WAIT_FRAMES = 4    -- wait until ~frame 6 (cr.MK active) before canceling
 
 local phase = "idle" -- "idle" | "starter" | "wait" | "special"
 local frame_in_phase = 0
@@ -64,7 +64,7 @@ local function decide_srk(input)
 
   if srk_step >= 3 then
     srk_step = 0
-    return false -- terminó
+    return false -- done
   end
   return true
 end
@@ -86,7 +86,7 @@ function ComboPunish.decide(input)
   end
 
   if phase == "wait" then
-    input["P2 Down"] = true -- se mantiene agachado, la postura de cr.MK
+    input["P2 Down"] = true -- stays crouched, cr.MK's posture
     frame_in_phase = frame_in_phase + 1
     if frame_in_phase >= WAIT_FRAMES then
       phase = "special"

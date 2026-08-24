@@ -1,9 +1,9 @@
--- Dash hacia adelante (66): doble toque rápido de "adelante". Se usa como
--- alternativa a caminar para cerrar distancia, igual que tatsumaki.lua.
+-- Forward dash (66): quick double-tap of "forward". Used as an alternative
+-- to walking to close distance, same as tatsumaki.lua.
 
 Dash = {}
 
-local SEQUENCE_FRAMES = 4 -- toque, suelta (para que el segundo toque cuente como nuevo), toque, sostiene
+local SEQUENCE_FRAMES = 4 -- tap, release (so the second tap counts as fresh), tap, hold
 local step = 0
 
 function Dash.active()
@@ -32,7 +32,7 @@ function Dash.decide(input)
   if step == 1 then
     input[forward] = true
   elseif step == 2 then
-    -- soltar a propósito
+    -- deliberately released
   elseif step == 3 or step == 4 then
     input[forward] = true
   end

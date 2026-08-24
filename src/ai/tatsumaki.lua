@@ -1,17 +1,17 @@
--- Tatsumaki Senpuu Kyaku (214+K): patada giratoria que avanza. Se usa acá
--- como herramienta alternativa para cerrar distancia (en vez de caminar
--- siempre). Secuencia: abajo, abajo-atrás, atrás+MK — "atrás" en el sentido
--- de la notación del movimiento (quarter circle back), no significa que
--- retroceda: igual avanza hacia el rival al ejecutarse.
+-- Tatsumaki Senpuu Kyaku (214+K): spinning kick that advances. Used here as
+-- an alternative tool to close distance (instead of always walking).
+-- Sequence: down, down-back, back+MK — "back" in the sense of the move's
+-- own notation (quarter circle back), it doesn't mean it retreats: it still
+-- moves toward the opponent when it comes out.
 
 Tatsumaki = {}
 
 local SEQUENCE_FRAMES = 3
 local step = 0
 
--- EX (2 patadas en vez de 1) cuando hay barra de meter — más golpes,
--- invencibilidad extra. No siempre, para no gastar meter en cualquier
--- acercamiento.
+-- EX (2 kicks instead of 1) when there's meter available — more hits,
+-- extra invincibility. Not always, so we don't burn meter on every
+-- approach.
 local EX_CHANCE = 0.3
 local use_ex = false
 
@@ -31,7 +31,7 @@ function Tatsumaki.reset()
   step = 0
 end
 
--- Devuelve true mientras está ejecutando la secuencia.
+-- Returns true while it's executing the sequence.
 function Tatsumaki.decide(input)
   if step == 0 then
     return false

@@ -1,7 +1,7 @@
--- Lee la lista de proyectiles activos en memoria (hadoukens, etc.).
--- Basado en el mecanismo de lectura de "game objects" de 3rd_training_lua:
--- una lista enlazada de slots, indexada por un puntero de cabeza por tipo
--- de lista (acá usamos la lista de proyectiles, id 3).
+-- Reads the list of active projectiles in memory (hadoukens, etc.).
+-- Based on 3rd_training_lua's "game object" reading mechanism: a linked
+-- list of slots, indexed by a head pointer per list type (here we use the
+-- projectile list, id 3).
 
 Projectiles = {}
 
@@ -18,7 +18,7 @@ function Projectiles.list()
   while slot <= MAX_OBJECTS and obj_index ~= -1 do
     local base = OBJECT_LIST_BASE + bit.lshift(obj_index, 11)
 
-    if memory.readdword(base + 0x2A0) ~= 0 then -- objeto válido
+    if memory.readdword(base + 0x2A0) ~= 0 then -- valid object
       table.insert(result, {
         base = base,
         pos_x = memory.readwordsigned(base + 0x64),

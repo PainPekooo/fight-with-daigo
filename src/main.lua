@@ -75,6 +75,10 @@ local function before_frame()
     return
   end
 
+  -- TEMPORARY debug: verifying the Evo Moment 37 easter egg captures P1's
+  -- picked Super Art correctly. Remove once confirmed.
+  gui.text(10, 10, string.format("opponent_sa:%s", tostring(OpponentTracker.selected_sa)))
+
   AI.decide(input)
   joypad.set(input)
 end

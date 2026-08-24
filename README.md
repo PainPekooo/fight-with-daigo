@@ -1,5 +1,7 @@
 # Fight with Daigo
 
+![Fight with Daigo](docs/banner.png)
+
 A mod for **Street Fighter III: 3rd Strike** (Fightcade v2.0.91 / FBNeo, ROM `sfiii3nr1` "Japan 990512").
 
 A Lua script that, in two-player mode, controls P2 as Ken (white gi) via a

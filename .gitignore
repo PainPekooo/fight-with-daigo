@@ -1,0 +1,6 @@
+# Local reference material — third-party code, not part of this project's license
+/reference/
+
+# ROMs are never committed
+*.zip
+*.29f400.*

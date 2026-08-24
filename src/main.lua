@@ -29,6 +29,7 @@ dofile(SCRIPT_DIR .. "ai/jump_in.lua")
 dofile(SCRIPT_DIR .. "ai/super_art.lua")
 dofile(SCRIPT_DIR .. "ai/combo_punish.lua")
 dofile(SCRIPT_DIR .. "ai/whiff_punish.lua")
+dofile(SCRIPT_DIR .. "ai/wakeup_mixup.lua")
 dofile(SCRIPT_DIR .. "ai/footsies.lua")
 dofile(SCRIPT_DIR .. "ai/decide.lua")
 

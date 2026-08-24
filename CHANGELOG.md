@@ -2,6 +2,12 @@
 
 Notable changes to this project, most recent first.
 
+## Wake-up mixup
+
+- On a knockdown, Ken now alternates between a throw attempt and a meaty
+  poke instead of always standing there mashing the same grab input, which
+  telegraphed exactly what was coming.
+
 ## Removed temporary debug overlay
 
 - Investigated a reported bug where P2 defaulted to SA1 instead of SA3 on

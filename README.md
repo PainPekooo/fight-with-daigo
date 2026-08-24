@@ -86,8 +86,10 @@ without touching the controller. During the match:
   melee hits, the nod to Evo Moment 37, with Block as a fallback if it
   fails).
 - Throw tech at grab range, alternating between a neutral throw and a back
-  throw (crosses the opponent to the other side) to avoid being predictable
-  on wake-up.
+  throw (crosses the opponent to the other side).
+- **Wake-up mixup**: on a knockdown, alternates between a throw attempt and
+  a meaty poke instead of always standing there mashing the same grab
+  input, which telegraphed exactly what was coming.
 - **Whiff punish**: punishes the opponent the instant they enter recovery,
   with a combo (cr.MK canceled into Super Art if there's meter, or into
   shoryuken if not) instead of a single hit — the only rule based on real
@@ -130,6 +132,7 @@ src/
     parry_fireball.lua -- parry attempt before Block blocks a projectile
     parry_melee.lua   -- occasional melee parry attempt (Evo Moment 37)
     throw_tech.lua    -- throw tech
+    wakeup_mixup.lua  -- throw vs. meaty poke mixup on knockdown
     super_art.lua     -- Super Art 3 (Shippu Jinraikyaku), used by combo_punish
     combo_punish.lua  -- cr.MK canceled into special/Super Art, used by whiff_punish
     whiff_punish.lua  -- punishes the opponent on recovery

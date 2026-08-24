@@ -37,6 +37,11 @@ function AI.decide(input)
 
   if WhiffPunish.decide(input) then return "whiff punish" end
 
+  -- Wake-up situations get their own mixup (throw vs. meaty poke) with
+  -- priority over Footsies/ThrowTech, so the opponent's knockdown doesn't
+  -- always get met with the same telegraphed throw attempt.
+  if WakeupMixup.decide(input) then return "wakeup mixup" end
+
   if Footsies.decide(input) then
     return "footsies: " .. Footsies.debug_action()
   end

@@ -76,13 +76,14 @@ local function before_frame()
   end
 
   -- TEMPORARY debug: figuring out the semantics of the parry validity/
-  -- cooldown timers (never used before) by watching YOUR (P1) own values
-  -- while you manually parry something. Remove once understood.
-  local p1_parry = Memory.read_parry_timers(1)
+  -- cooldown timers (never used before) by watching Ken's (P2, the one
+  -- already auto-attempting fireball parries) own values while P1 throws
+  -- hadoukens from far away. Remove once understood.
+  local p2_parry = Memory.read_parry_timers(2)
   gui.text(10, 10, string.format(
-    "P1 fwd v:%d c:%d  down v:%d c:%d",
-    p1_parry.forward.validity, p1_parry.forward.cooldown,
-    p1_parry.down.validity, p1_parry.down.cooldown))
+    "P2 fwd v:%d c:%d  down v:%d c:%d",
+    p2_parry.forward.validity, p2_parry.forward.cooldown,
+    p2_parry.down.validity, p2_parry.down.cooldown))
 
   AI.decide(input)
   joypad.set(input)

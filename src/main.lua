@@ -68,6 +68,15 @@ local function before_frame()
 
   if not Memory.is_round_active() then
     CharacterSelect.force_ken(input)
+
+    -- TEMPORARY debug: tracking a bug where P2 defaults to SA1 instead of
+    -- SA3 after a "continue" (P1 inserts a coin again after losing) — the
+    -- forcing logic in character_select.lua was already fragile once
+    -- before (see its comments), so this needs to be seen live instead of
+    -- guessed at again. Remove once that's fixed.
+    local s2 = Memory.read_select_state(2)
+    gui.text(10, 10, string.format("P2 select  state:%d sa:%d", s2.state, s2.sa))
+
     joypad.set(input)
     return
   end

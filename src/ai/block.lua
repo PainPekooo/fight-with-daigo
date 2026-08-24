@@ -16,21 +16,28 @@
 --    (this one still goes by proximity — there's no attack hitbox to read
 --    on a projectile object).
 --
--- Known limitation: reacting only once the hitbox is already active means
--- there's no lead time at all — a fast enough move (in particular, "close"
--- normals in this game tend to have quicker startup than their "far"
--- counterparts) can still connect before the block registers, especially
--- at point-blank range. Fixing this for real would mean predicting the
--- block from the opponent's move startup instead of reacting to the active
--- hitbox, which needs frame data for the whole cast, not just Ken — out of
--- scope for now.
+-- Used to have a known limitation here: reacting only once the hitbox is
+-- already active gives no lead time, so a fast enough "close" normal could
+-- connect before the block registered, especially point-blank. Now
+-- partially addressed with a 3rd case:
+-- 3) Predictive: if the opponent's current move is one we've already timed
+--    before this session (see opponent_move_timing.lua), and it's within
+--    PREDICT_LEAD_FRAMES of going active, block early instead of waiting
+--    for the hitbox. Only helps for moves already seen at least once —
+--    the very first time any given move shows up, there's nothing to
+--    predict yet and this falls back to the same reactive path as before.
 --
--- Blocking an active hit has no delay (the hit is already coming out,
--- there's no room to simulate reaction time). Blocking a projectile does
--- have a random delay (it's coming from far away, there's plenty of
--- margin).
+-- Blocking an active hit (or a predicted one) has no delay (the hit is
+-- already coming, or about to — there's no room to simulate reaction
+-- time). Blocking a projectile does have a random delay (it's coming from
+-- far away, there's plenty of margin).
 
 Block = {}
+
+-- How many frames before a known move's measured active frame to start
+-- blocking. A starting guess, not verified live yet -- tune based on
+-- whether it's still eating fast close normals it's already seen once.
+local PREDICT_LEAD_FRAMES = 2
 
 -- Widened from 180 to 220 for max difficulty ("al palo") — starts reacting
 -- to a fireball earlier.
@@ -67,6 +74,11 @@ function Block.has_threat()
     return true
   end
 
+  local predicted = OpponentMoveTiming.frames_until_active()
+  if predicted ~= nil and predicted <= PREDICT_LEAD_FRAMES then
+    return true
+  end
+
   local threat, dist = nearest_incoming_projectile(self_state)
   return threat ~= nil and dist <= PROJECTILE_RANGE
 end
@@ -81,13 +93,21 @@ function Block.decide(input)
     return false
   end
 
-  if Memory.has_active_attack_box(AIUtil.OPPONENT_ID) and not AIUtil.is_jumping(opponent_state.posture) then
+  local active_now = Memory.has_active_attack_box(AIUtil.OPPONENT_ID)
+    and not AIUtil.is_jumping(opponent_state.posture)
+
+  local predicted = OpponentMoveTiming.frames_until_active()
+  local predicted_soon = not active_now and predicted ~= nil and predicted <= PREDICT_LEAD_FRAMES
+    and not AIUtil.is_jumping(opponent_state.posture)
+
+  if active_now or predicted_soon then
     pending_delay = nil
     blocking_active = false
     -- Only crouch for lows (same approximation as parry_melee.lua: opponent
     -- crouching ~ probably a low hit). Used to always crouch regardless of
     -- the incoming hit, which blocked fine but looked odd against clearly
-    -- high/mid attacks.
+    -- high/mid attacks. Works the same for the predicted case: posture is
+    -- known immediately, it's only the hitbox itself we're getting ahead of.
     if opponent_state.posture == Memory.POSTURE.CROUCHING then
       input["P2 Down"] = true
     end

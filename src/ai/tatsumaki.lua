@@ -10,9 +10,12 @@ local SEQUENCE_FRAMES = 3
 local step = 0
 
 -- EX (2 kicks instead of 1) when there's meter available — more hits,
--- extra invincibility. Not always, so we don't burn meter on every
--- approach.
-local EX_CHANCE = 0.3
+-- extra invincibility. Shrunk from 0.3 to 0.1: EX and Super Art both spend
+-- the same gauge (`gauge >= 1`, see whiff_punish.lua/combo_punish.lua), so
+-- burning it here just to close distance was directly competing with — and
+-- often emptying — the meter the whiff-punish combo needs, reported live
+-- as spamming EX to approach and losing the super in the process.
+local EX_CHANCE = 0.1
 local use_ex = false
 
 function Tatsumaki.active()

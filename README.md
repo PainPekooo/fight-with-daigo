@@ -83,20 +83,25 @@ without touching the controller. During the match:
   reaction delay.
 - Melee blocking (based on a real attack hitbox, not distance, crouching
   only for lows) and standing blocking against hadoukens (reads the
-  projectile list), with a parry attempt before blocking (always against
-  projectiles; occasional — 40% — against melee hits, the nod to Evo Moment
-  37, with Block as a fallback if it fails).
-  Known limitation: reacting only once the hit is already active means
-  there's no lead time — a fast enough move (in this game, "close" normals
-  tend to be quicker than their "far" versions) can still connect before
-  the block registers, especially at point-blank range. Fixing this for
-  real needs predicting the block from the opponent's move startup, which
-  needs frame data for the whole cast, not just Ken.
+  projectile list), with a parry attempt before blocking — 50% against
+  projectiles, 40% against melee hits (the nod to Evo Moment 37), Block as
+  a fallback either way. Neither is unconditional: a parry attempt itself
+  briefly drops the block (has to, they're opposite inputs), so both roll
+  a chance instead of always taking that guard-drop risk.
+  Partially addressed for repeat offenders: the first time it sees any
+  given move it's still purely reactive (no lead time — a fast enough
+  "close" normal can still connect before the block registers, especially
+  point-blank), but it times how long that exact move took to become
+  active and remembers it per character; the next time it sees the same
+  move, it starts blocking a couple of frames before the hitbox goes live
+  instead of waiting for it. See `opponent_move_timing.lua`.
 - Throw tech at grab range, alternating between a neutral throw and a back
   throw (crosses the opponent to the other side).
 - **Wake-up mixup**: on a knockdown, alternates between a throw attempt and
   a meaty poke instead of always standing there mashing the same grab
-  input, which telegraphed exactly what was coming.
+  input. The throw attempt itself is a short bounded burst, not a mash for
+  the whole knockdown window — live-tested and reported as an obvious tell
+  that let a reversal shoryuken always beat it.
 - **Whiff punish**: punishes the opponent the instant they enter recovery,
   with a combo (cr.MK canceled into Super Art if there's meter, or into
   shoryuken if not) instead of a single hit — the only rule based on real
@@ -105,9 +110,13 @@ without touching the controller. During the match:
   know for sure whether it connects as a real combo or as two separate
   hits.
 - Footsies: closes the distance (walking, dashing, tatsumaki, offensive
-  jump, or holding ground at random — not always a straight line forward)
-  and pokes (random cr.MK / cr.MP / st.MP) when the opponent enters range,
-  with an occasional step back after poking.
+  jump, or holding ground at random — not always a straight line forward,
+  and discounted from repeating the same one twice in a row) and pokes
+  (random cr.MK / cr.MP / st.MP) when the opponent enters range, with an
+  occasional step back after poking. EX tatsumaki is rare (10%) rather than
+  routine — it spends the same meter Whiff Punish needs for a Super Art
+  punish, so burning it just to close distance was reported as costing the
+  bigger payoff.
 - **Easter egg**: if the opponent is Chun-Li and picked SA2 (Houyoku Sen)
   at character select, the melee parry attempt chance goes to 100% instead
   of 18% — the Evo Moment 37 recreation. Doesn't fingerprint the specific
@@ -124,6 +133,9 @@ without touching the controller. During the match:
   game-tree/minimax search — that needs simulating the opponent's future
   moves, which isn't possible live against an unknown human — closer to a
   human player noticing a habit after a few repeats and leaning on it.
+  Predictive blocking (see above) uses the same "learn it live" approach:
+  no external framedata, just remembering what it's already measured
+  against this opponent this session.
 
 TODO: more research into real sources about Daigo to replace the generic
 parameters that remain.

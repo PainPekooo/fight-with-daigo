@@ -6,7 +6,9 @@
 -- the rest of the time it returns false and Block stays as the fallback.
 --
 -- Block comes before Footsies: if there's a real threat (an active hit
--- from the opponent, or an incoming projectile), blocking always wins.
+-- from the opponent, a predicted one about to go active for a move we've
+-- already timed this session, or an incoming projectile), blocking always
+-- wins.
 -- Since Block no longer depends on distance for the melee case (it reads
 -- whether the opponent has an active attack hitbox, see block.lua), this
 -- doesn't reintroduce the old "Ken blocks the whole match" bug: if the

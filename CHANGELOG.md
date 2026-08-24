@@ -2,6 +2,70 @@
 
 Notable changes to this project, most recent first.
 
+## Live-playtest fixes: wake-up grab spam, tatsumaki spam, EX meter waste
+
+- **Wake-up throw spam**: `WakeupMixup`'s throw choice used to mash the
+  grab input for the entire knockdown window instead of a bounded number
+  of attempts. Reported live: it was an obvious tell (Ken visibly flailing
+  the grab the whole time), letting a reversal shoryuken always beat it
+  clean on wake-up. Now bounded to `THROW_ATTEMPT_CYCLES` (3) press/release
+  cycles, then holds position instead of continuing to mash.
+- **Footsies approach spam**: `pick_approach_mode()` had no memory of the
+  last pick, so a long retreat/chase (many independent rolls in a row)
+  could land on the same mode — reported live as Ken repeatedly spamming
+  tatsumaki while chasing a retreating opponent. Now discounts whatever was
+  picked last time to 15% of its normal weight before rerolling, so it can
+  still repeat occasionally but rarely back-to-back.
+- **EX meter waste**: EX tatsumaki (`tatsumaki.lua`) and Super Art
+  (`combo_punish.lua`/`whiff_punish.lua`) both spend the same `gauge >= 1`
+  meter. Reported live as spamming EX just to close distance, directly
+  emptying the meter the whiff-punish combo needs for its bigger payoff.
+  Shrunk EX tatsumaki's chance from 0.3 to 0.1.
+- **Diagnosed and fixed the reported "blocks a Super Art from the right
+  once, then eats a later one" bug** (temporary debug logging, console
+  Output box scrollback, same style as the earlier left/right block bug —
+  removed again now that it's understood). Ruled out: a left/right
+  direction bug — every backward-block direction logged across the whole
+  session was correct for both sides, matching the earlier investigation's
+  conclusion that this game's block issues aren't actually side-dependent.
+  Real cause: `ParryFireball` attempted a parry tap (pressing forward)
+  unconditionally on every projectile overlap, unlike `parry_melee.lua`
+  which only attempts a fraction of the time. Pressing forward for that one
+  frame meant no block was held, and both logged hits landed ~2 frames
+  after a tap — when the tap's parry attempt failed, Ken had no guard up
+  for the hit that followed. (A second, smaller hit later in the same
+  encounter, ~7 frames after the block had resumed and stayed held, looks
+  like normal chip damage from blocking a multi-hit Super Art rather than a
+  block failure — blocking doesn't fully no-sell super chip damage in this
+  game.) Fix: gated `ParryFireball` the same way melee already is — rolls
+  once per incoming projectile (`ATTEMPT_CHANCE = 0.5`) instead of
+  attempting on every single one, so Block covers the rest without taking
+  the guard-drop risk.
+
+## Add predictive blocking (live-learned per-move startup timing)
+
+- Looked at effie3rd/3rd_training_lua (a training-mode rewrite with full
+  per-character framedata) as a possible source for the "frame data for
+  the whole cast" the known block limitation needed. It's GPL-3.0
+  licensed, which would mean relicensing this whole project as GPL to
+  distribute anything derived from its compiled data/code — decided
+  against that, same principle already applied to Grouflon's (unlicensed)
+  reference repo: read for understanding, never copy code/data in.
+- Instead, new `opponent_move_timing.lua`: times, live, how many frames
+  elapse between a given (character, action_state) starting and its
+  attack hitbox going active. First time any move is seen, nothing to
+  predict yet — Block stays purely reactive for it, same as before. Next
+  time the SAME move shows up, Block starts blocking `PREDICT_LEAD_FRAMES`
+  (2, unverified starting guess) frames before the hitbox is expected,
+  instead of waiting for it — directly targets the fast-close-normal block
+  gap without any external data or license entanglement.
+- `Block.has_threat()` and `Block.decide()` now treat a predicted
+  soon-to-be-active hit the same as an already-active one (still gated on
+  the opponent not jumping, same as the reactive case — that's AntiAir's
+  job).
+- Not live-tested yet — the lead value in particular will need tuning once
+  it's actually seen blocking a repeat move early in a real match.
+
 ## Add opponent "reads" (lightweight profiling, not a game-tree search)
 
 - New `opponent_reads.lua`: tracks two live tendencies for the whole

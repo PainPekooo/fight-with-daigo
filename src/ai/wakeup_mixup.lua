@@ -18,12 +18,22 @@ local PRESS_FRAMES = 2
 local RELEASE_FRAMES = 2
 local CYCLE_FRAMES = PRESS_FRAMES + RELEASE_FRAMES
 
+-- How many press/release cycles to mash the throw for before giving up and
+-- just holding position. Used to mash for the WHOLE knockdown window (as
+-- long as `active` stayed true) -- live-tested and reported as too
+-- obviously a grab the entire time the opponent was down, letting a
+-- reversal shoryuken always beat it clean. A short bounded burst still has
+-- a shot at catching the exact wake-up frame without telegraphing it for
+-- the whole window.
+local THROW_ATTEMPT_CYCLES = 3
+
 local POKE_HOLD_FRAMES = 2
 local POKE_COOLDOWN_FRAMES = 25
 
 local was_active = false
 local choice = nil -- "throw" | "poke"
 local frame_counter = 0
+local throw_cycles_done = 0
 local poke_hold = 0
 local poke_cooldown = 0
 
@@ -39,6 +49,7 @@ function WakeupMixup.decide(input)
     was_active = false
     choice = nil
     frame_counter = 0
+    throw_cycles_done = 0
     poke_hold = 0
     poke_cooldown = 0
     return false
@@ -46,6 +57,7 @@ function WakeupMixup.decide(input)
 
   if not was_active then
     choice = (math.random() < THROW_CHANCE) and "throw" or "poke"
+    throw_cycles_done = 0
   end
   was_active = true
 
@@ -65,11 +77,20 @@ function WakeupMixup.decide(input)
     return true
   end
 
-  -- choice == "throw": mash like throw_tech.lua
+  -- choice == "throw": mash like throw_tech.lua, but only for a bounded
+  -- number of cycles -- once spent, hold position instead of continuing to
+  -- flail the grab (see THROW_ATTEMPT_CYCLES above).
+  if throw_cycles_done >= THROW_ATTEMPT_CYCLES then
+    return true
+  end
+
   frame_counter = (frame_counter + 1) % CYCLE_FRAMES
   if frame_counter < PRESS_FRAMES then
     input["P2 Weak Punch"] = true
     input["P2 Weak Kick"] = true
+  end
+  if frame_counter == CYCLE_FRAMES - 1 then
+    throw_cycles_done = throw_cycles_done + 1
   end
   return true
 end

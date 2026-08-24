@@ -8,14 +8,30 @@
 --
 -- Doesn't replace Block: if this fails, Block.decide() still acts as a
 -- proximity-based fallback (see decide.lua).
+--
+-- Live-debugged (console logging with scrollback, same as the earlier
+-- left/right block bug): the tap itself is what was pressing forward,
+-- interrupting whatever backward hold Block had going — normal, documented
+-- tradeoff. But this used to attempt on EVERY overlap, unconditionally
+-- (unlike parry_melee.lua, which only attempts a fraction of the time and
+-- lets Block cover the rest). That meant every single incoming projectile
+-- carried a guaranteed one-frame guard-drop risk. Now gated the same way
+-- melee is: roll once per incoming projectile, and only take the risk that
+-- fraction of the time.
 
 ParryFireball = {}
 
 -- From the reference repo's framedata.lua (character_specific.ken.half_width).
 local KEN_HALF_WIDTH = 30
 
+-- Higher than parry_melee's (0.4): this one is timed off the real hitbox
+-- overlap frame, not a guess, so it's inherently more reliable — still not
+-- 100%, so a fully safe block is always available some of the time too.
+local ATTEMPT_CHANCE = 0.5
+
 local was_overlapping = false
 local overlap_frames = 0
+local will_attempt = false
 
 local function overlapping_projectile(self_state)
   for _, obj in ipairs(Projectiles.list()) do
@@ -50,8 +66,17 @@ function ParryFireball.decide(input)
     return false
   end
 
+  local just_started = not was_overlapping
   overlap_frames = was_overlapping and (overlap_frames + 1) or 0
   was_overlapping = true
+
+  if just_started then
+    will_attempt = math.random() < ATTEMPT_CHANCE
+  end
+
+  if not will_attempt then
+    return false -- let Block handle this one, no guard-drop risk taken
+  end
 
   -- Taps on frame 0 (right as the overlap starts) and on frame 2 (in case
   -- the first one landed a bit early/late) — one frame of release in

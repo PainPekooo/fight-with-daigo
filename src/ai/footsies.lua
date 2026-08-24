@@ -51,6 +51,7 @@ local poke_hold = 0
 local poke_cooldown = 0
 local current_poke = nil
 local approach_mode = nil -- nil | "walk" | "tatsu" | "dash" | "jump" | "retreat"
+local last_approach_mode = nil
 local retreat_frames = 0
 local last_action = "idle"
 
@@ -60,17 +61,32 @@ local function apply_poke(input, poke)
   end
 end
 
+-- Discounts whatever approach mode was picked last time, so a long
+-- retreat/chase (many independent picks in a row) doesn't keep landing on
+-- the same one -- live-tested and reported as Ken visibly spamming
+-- tatsumaki over and over while chasing a retreating opponent. Doesn't
+-- forbid an immediate repeat outright (still occasionally happens, 15% of
+-- its normal weight), just makes it uncommon instead of "as likely as
+-- anything else every single time."
+local REPEAT_DISCOUNT = 0.15
+
 local function pick_approach_mode()
   local zoner_read = OpponentReads.zoner()
   local roll = math.random()
   local acc = 0
   for _, name in ipairs(APPROACH_OPTIONS) do
     local base, anti_zone = APPROACH_WEIGHTS_BASE[name], APPROACH_WEIGHTS_ANTI_ZONE[name]
-    acc = acc + base + (anti_zone - base) * zoner_read
+    local weight = base + (anti_zone - base) * zoner_read
+    if name == last_approach_mode then
+      weight = weight * REPEAT_DISCOUNT
+    end
+    acc = acc + weight
     if roll <= acc then
+      last_approach_mode = name
       return name
     end
   end
+  last_approach_mode = "walk"
   return "walk"
 end
 

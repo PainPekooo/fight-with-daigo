@@ -73,6 +73,11 @@ local function before_frame()
     return
   end
 
+  -- TEMPORARY debug: verifying the real action_state id for Chun-Li's SA2
+  -- (Houyoku Sen) for the Evo Moment 37 easter egg. Remove once confirmed.
+  local opponent_state = Memory.read_player_state(AIUtil.OPPONENT_ID)
+  gui.text(10, 10, string.format("P1 %s  action_state:%04x", tostring(opponent_state.char_name), opponent_state.action_state))
+
   AI.decide(input)
   joypad.set(input)
 end

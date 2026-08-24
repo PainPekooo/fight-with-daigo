@@ -2,6 +2,12 @@
 
 Notable changes to this project, most recent first.
 
+## Difficulty: tighter reaction delay
+
+- Shrunk the random reaction delay before anti-air (2-6 → 1-3 frames) and
+  before blocking a projectile (2-5 → 1-2 frames), on request — trades a
+  bit of the "human" feel for being harder to beat.
+
 ## README: new banner image
 
 - Swapped the title banner for a more dynamic action shot (Ken taking a

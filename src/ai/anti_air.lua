@@ -25,9 +25,10 @@ local cooldown = 0
 -- Random delay before starting the sequence, so it doesn't always react on
 -- the exact frame the opponent jumps (looks robotic). Not a verified human
 -- reaction-time figure, just a reasonable range so variation shows without
--- losing the anti-air entirely.
-local REACTION_DELAY_MIN = 2
-local REACTION_DELAY_MAX = 6
+-- losing the anti-air entirely. Shrunk from 2-6 to 1-3 on request (wanted
+-- more difficulty) — still some variation, but tighter.
+local REACTION_DELAY_MIN = 1
+local REACTION_DELAY_MAX = 3
 local pending_delay = nil
 
 -- Variety: not always HP (the flashiest/strongest, with the most hits).

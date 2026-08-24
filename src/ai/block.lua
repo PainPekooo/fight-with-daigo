@@ -23,8 +23,9 @@ Block = {}
 
 local PROJECTILE_RANGE = 180 -- distance to react to an incoming projectile
 
-local REACTION_DELAY_MIN = 2
-local REACTION_DELAY_MAX = 5
+-- Shrunk from 2-5 to 1-2 on request (wanted more difficulty).
+local REACTION_DELAY_MIN = 1
+local REACTION_DELAY_MAX = 2
 local pending_delay = nil
 local blocking_active = false
 

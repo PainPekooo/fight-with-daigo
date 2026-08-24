@@ -2,6 +2,14 @@
 
 Notable changes to this project, most recent first.
 
+## Removed temporary debug overlay
+
+- Investigated a reported bug where P2 defaulted to SA1 instead of SA3 on
+  a "continue" after losing. Confirmed live (twice, including coming out
+  of attract-mode demo play) that P2 correctly locks in SA3 — looks like it
+  was intermittent, not a real regression. Removed the temporary debug text
+  added to track it down.
+
 ## Difficulty: tighter reaction delay
 
 - Shrunk the random reaction delay before anti-air (2-6 → 1-3 frames) and

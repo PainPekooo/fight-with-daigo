@@ -34,15 +34,34 @@ modelar reads/perfilado de rival de verdad, que quedó pendiente.
 Funcional como prototipo. P2 se auto-selecciona (Ken, traje blanco, SA3) sin
 tocar el control. Durante el combate:
 
-- Anti-air reactivo (shoryuken) con cooldown y delay aleatorio.
-- Bloqueo cuerpo a cuerpo y contra hadoukens (lee la lista de proyectiles).
-- Zafar agarres a distancia de agarre.
-- Footsies: camina o cierra con tatsumaki, y pokea (cr.MK / cr.MP / st.MP al
-  azar) cuando el rival entra en rango.
+- Anti-air reactivo: shoryuken (LP/MP/HP al azar, EX si hay meter) el 60% de
+  las veces, anti-air normal (st.HP) el resto — para no ser 100% predecible
+  ni air-parryable siempre — con cooldown y delay aleatorio.
+- Bloqueo cuerpo a cuerpo (por hitbox de ataque real, no distancia) y contra
+  hadoukens (lee la lista de proyectiles), con intento de parry antes de
+  bloquear (siempre contra proyectiles; ocasional — 18% — contra golpes
+  cuerpo a cuerpo, el guiño a Evo Moment 37, con Block de respaldo si falla).
+- Zafar agarres a distancia de agarre, variando entre agarre neutral y
+  agarre hacia atrás (cruza al rival de lado) para no ser predecible en
+  despertar.
+- **Whiff punish**: castiga al rival apenas queda en recovery, con un combo
+  (cr.MK cancelado en Super Art si hay meter, o en shoryuken si no) en vez
+  de un solo golpe — la única regla basada en la investigación real sobre
+  Daigo (ver arriba), no en fundamentos genéricos. El timing de la
+  cancelación (`combo_punish.lua`) todavía no está confirmado en vivo — no
+  sabemos con certeza si conecta como combo real o como 2 golpes separados.
+- Footsies: cierra distancia (caminando, dash, tatsumaki, salto ofensivo o
+  manteniendo distancia al azar — no siempre en línea recta hacia adelante)
+  y pokea (cr.MK / cr.MP / st.MP al azar) cuando el rival entra en rango,
+  con retroceso ocasional después de pokear.
 
 Pendiente: modelar reads/perfilado de rival de verdad (más allá del delay de
-reacción), más variedad de movimientos, y más investigación de fuentes reales
-sobre Daigo para reemplazar los parámetros genéricos que quedan.
+reacción y el whiff punish), más investigación de fuentes reales sobre Daigo
+para reemplazar los parámetros genéricos que quedan, y un easter egg: parry
+garantizado si el rival es Chun-Li y tira su SA2 (Houyoku Sen, Evo Moment 37).
+Candidato encontrado en el framedata de Chun-Li (move id `5f54`, 17 ventanas
+de golpe en 121 frames — encaja con el perfil) pero sin confirmar en vivo
+todavía.
 
 ## Requisitos
 
@@ -62,10 +81,17 @@ src/
     decide.lua       -- orquestador: prioridad entre las reglas de abajo
     util.lua          -- helpers compartidos (postura de salto, direcciones)
     anti_air.lua      -- shoryuken reactivo
-    block.lua         -- bloqueo cuerpo a cuerpo y contra proyectiles
+    block.lua         -- bloqueo cuerpo a cuerpo (hitbox real) y proyectiles
+    parry_fireball.lua -- intento de parry antes de que Block bloquee un proyectil
+    parry_melee.lua   -- intento ocasional de parry cuerpo a cuerpo (Evo Moment 37)
     throw_tech.lua    -- zafar agarres
+    super_art.lua     -- Super Art 3 (Shippu Jinraikyaku), usado por combo_punish
+    combo_punish.lua  -- cr.MK cancelado en especial/Super Art, usado por whiff_punish
+    whiff_punish.lua  -- castiga al rival en recovery
     tatsumaki.lua     -- hurricane kick, usado para cerrar distancia
-    footsies.lua      -- caminar/pokear en rango medio
+    dash.lua          -- dash hacia adelante, usado para cerrar distancia
+    jump_in.lua       -- salto ofensivo, usado para cerrar distancia
+    footsies.lua      -- caminar/pokear en rango medio, orquesta el acercamiento
 ```
 
 ## Créditos

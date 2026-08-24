@@ -28,13 +28,19 @@ local POKES = {
 }
 
 -- Cómo cerrar distancia, con pesos (no todas las opciones igual de seguido).
-local APPROACH_OPTIONS = { "walk", "tatsu", "dash", "jump" }
-local APPROACH_WEIGHTS = { walk = 0.40, tatsu = 0.20, dash = 0.25, jump = 0.15 }
+-- "retreat" es la excepción: en vez de cerrar, se aleja un tramo — así el
+-- acercamiento no es siempre en línea recta hacia adelante.
+local APPROACH_OPTIONS = { "walk", "tatsu", "dash", "jump", "retreat" }
+local APPROACH_WEIGHTS = { walk = 0.35, tatsu = 0.15, dash = 0.20, jump = 0.10, retreat = 0.20 }
+
+local RETREAT_APPROACH_FRAMES_MIN = 15
+local RETREAT_APPROACH_FRAMES_MAX = 30
+local retreat_approach_frames = 0
 
 local poke_hold = 0
 local poke_cooldown = 0
 local current_poke = nil
-local approach_mode = nil -- nil | "walk" | "tatsu" | "dash" | "jump"
+local approach_mode = nil -- nil | "walk" | "tatsu" | "dash" | "jump" | "retreat"
 local retreat_frames = 0
 local last_action = "quieto"
 
@@ -58,6 +64,7 @@ end
 
 local function reset_approach()
   approach_mode = nil
+  retreat_approach_frames = 0
   Tatsumaki.reset()
   Dash.reset()
   JumpIn.reset()
@@ -67,14 +74,21 @@ function Footsies.decide(input)
   local self_state = Memory.read_player_state(AIUtil.SELF_ID)
   local opponent_state = Memory.read_player_state(AIUtil.OPPONENT_ID)
 
-  -- Si Ken está en el aire PORQUE nosotros mandamos un salto ofensivo,
-  -- seguimos manejando ese salto (subir, esperar, pegar) aunque su postura
-  -- ahora sea "saltando". Si está en el aire por cualquier otro motivo (o
-  -- si es el rival el que está saltando), no hacemos nada — eso lo maneja
-  -- AntiAir con prioridad más alta.
+  -- Si Ken está en el aire PORQUE nosotros mandamos un salto ofensivo o un
+  -- tatsumaki (que despega del piso un momento), seguimos manejando esa
+  -- secuencia aunque su postura ahora sea "saltando" — si no, el chequeo de
+  -- abajo la corta a mitad de camino (esto pasaba de verdad: el tatsumaki
+  -- se abortaba en el primer frame y parecía trabado/repitiendo en vez de
+  -- completar el movimiento). Si está en el aire por cualquier otro motivo
+  -- (o si es el rival el que está saltando), no hacemos nada — eso lo
+  -- maneja AntiAir con prioridad más alta.
   if AIUtil.is_jumping(self_state.posture) then
     if JumpIn.active() and JumpIn.decide(input) then
       last_action = "salto ofensivo"
+      return true
+    end
+    if Tatsumaki.active() and Tatsumaki.decide(input) then
+      last_action = "tatsumaki (acercando)"
       return true
     end
     poke_hold = 0
@@ -115,6 +129,21 @@ function Footsies.decide(input)
   if dist > POKE_RANGE_MAX then
     if approach_mode == nil then
       approach_mode = pick_approach_mode()
+      if approach_mode == "retreat" then
+        retreat_approach_frames = math.random(RETREAT_APPROACH_FRAMES_MIN, RETREAT_APPROACH_FRAMES_MAX)
+      end
+    end
+
+    if approach_mode == "retreat" then
+      if retreat_approach_frames > 0 then
+        input[AIUtil.backward_input(self_state, opponent_state)] = true
+        retreat_approach_frames = retreat_approach_frames - 1
+        last_action = "manteniendo distancia"
+        return true
+      end
+      approach_mode = nil -- termina el tramo, el próximo frame vuelve a decidir
+      last_action = "manteniendo distancia"
+      return true
     end
 
     if approach_mode == "tatsu" then

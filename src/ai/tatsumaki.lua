@@ -9,6 +9,12 @@ Tatsumaki = {}
 local SEQUENCE_FRAMES = 3
 local step = 0
 
+-- EX (2 patadas en vez de 1) cuando hay barra de meter — más golpes,
+-- invencibilidad extra. No siempre, para no gastar meter en cualquier
+-- acercamiento.
+local EX_CHANCE = 0.3
+local use_ex = false
+
 function Tatsumaki.active()
   return step > 0
 end
@@ -16,6 +22,8 @@ end
 function Tatsumaki.start()
   if step == 0 then
     step = 1
+    local self_state = Memory.read_player_state(AIUtil.SELF_ID)
+    use_ex = self_state.gauge >= 1 and math.random() < EX_CHANCE
   end
 end
 
@@ -40,7 +48,12 @@ function Tatsumaki.decide(input)
     input[back] = true
   elseif step == 3 then
     input[back] = true
-    input["P2 Medium Kick"] = true
+    if use_ex then
+      input["P2 Weak Kick"] = true
+      input["P2 Strong Kick"] = true
+    else
+      input["P2 Medium Kick"] = true
+    end
   end
 
   step = step + 1

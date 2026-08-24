@@ -36,6 +36,18 @@ local pending_delay = nil
 local PUNCH_OPTIONS = { "P2 Weak Punch", "P2 Medium Punch", "P2 Strong Punch" }
 local current_punch = nil
 
+-- Variedad más importante: no siempre shoryuken. Un DP repetido siempre es
+-- 100% predecible (se puede air-parry con certeza sabiendo que va a salir)
+-- y arriesgado si falla (recovery largo, whiff punishable). A veces usamos
+-- un anti-air normal (st.HP) en vez del especial — más seguro, menos
+-- vistoso, pero rompe el patrón. Conecta con lo investigado sobre el
+-- "Ume-Shoryu": una apuesta calculada, no un reflejo garantizado.
+local SRK_CHANCE = 0.6
+
+-- EX shoryuken (2 puños en vez de 1) cuando hay barra de meter — más daño e
+-- invencibilidad extra. No siempre, para no gastar meter en cualquier salto.
+local EX_CHANCE = 0.3
+
 -- Devuelve true si tomó el frame (el orquestador no debe dejar que otra
 -- regla de IA pise este input).
 function AntiAir.decide(input)
@@ -66,8 +78,21 @@ function AntiAir.decide(input)
     end
 
     pending_delay = nil
+
+    if math.random() >= SRK_CHANCE then
+      -- anti-air normal en vez de shoryuken: un solo frame de HP alcanza,
+      -- no hace falta secuencia de motion.
+      input["P2 Strong Punch"] = true
+      cooldown = COOLDOWN_FRAMES
+      return true
+    end
+
     srk_step = 1
-    current_punch = PUNCH_OPTIONS[math.random(#PUNCH_OPTIONS)]
+    if self_state.gauge >= 1 and math.random() < EX_CHANCE then
+      current_punch = "EX"
+    else
+      current_punch = PUNCH_OPTIONS[math.random(#PUNCH_OPTIONS)]
+    end
   end
 
   local forward = AIUtil.forward_input(self_state, opponent_state)
@@ -79,7 +104,12 @@ function AntiAir.decide(input)
   elseif srk_step == 3 then
     input["P2 Down"] = true
     input[forward] = true
-    input[current_punch] = true
+    if current_punch == "EX" then
+      input["P2 Weak Punch"] = true
+      input["P2 Strong Punch"] = true
+    else
+      input[current_punch] = true
+    end
   end
 
   srk_step = srk_step + 1

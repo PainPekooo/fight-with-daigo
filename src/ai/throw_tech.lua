@@ -2,7 +2,11 @@
 -- agarre (LP+LK) — es la técnica real que usan los jugadores para tech-ear
 -- un throw sin necesitar detectar el agarre del rival específicamente. El
 -- juego lo reconoce como intento de zafarse. De paso, si el rival no agarra,
--- esto también tira su propio agarre cuando hay ventana.
+-- esto también tira su propio agarre cuando hay ventana — variando entre
+-- agarre neutral (lo tira hacia adelante, del mismo lado) y agarre hacia
+-- atrás (lo cruza al otro lado de la pantalla) para no ser 100% predecible
+-- en situaciones de despertar, donde machacar siempre el mismo agarre se
+-- lee fácil.
 --
 -- No reemplaza el bloqueo (Block.decide) — se aplica encima, en frames
 -- alternados, para no cancelar el guard con el input de agarre sostenido.
@@ -19,7 +23,10 @@ local THROW_RANGE = 55
 local PRESS_FRAMES = 2
 local RELEASE_FRAMES = 2
 local CYCLE_FRAMES = PRESS_FRAMES + RELEASE_FRAMES
+local BACK_THROW_CHANCE = 0.4
+
 local frame_counter = 0
+local use_back_throw = false
 
 function ThrowTech.decide(input)
   local self_state = Memory.read_player_state(AIUtil.SELF_ID)
@@ -36,9 +43,17 @@ function ThrowTech.decide(input)
     return false
   end
 
+  if frame_counter == 0 then
+    use_back_throw = math.random() < BACK_THROW_CHANCE
+  end
+
   frame_counter = (frame_counter + 1) % CYCLE_FRAMES
   if frame_counter >= PRESS_FRAMES then
     return false
+  end
+
+  if use_back_throw then
+    input[AIUtil.backward_input(self_state, opponent_state)] = true
   end
 
   input["P2 Weak Punch"] = true

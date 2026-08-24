@@ -102,6 +102,26 @@ M.PLAYER_SELECT = {
   },
 }
 
+-- Never used until now (mapped at the very start of the project, before we
+-- even had a working script). Reads a player's parry validity/cooldown
+-- timers — likely the game's own bookkeeping for "is a parry input eligible
+-- right now" per direction, though we don't know the exact semantics yet
+-- (does validity count up or down? is cooldown nonzero only right after an
+-- attempt?) — being verified live for the Evo Moment 37 easter egg's
+-- timing.
+function M.read_parry_timers(player_id)
+  local p = M.PLAYER_FIXED[player_id].parry
+  local function pair(addrs)
+    return { validity = memory.readbyte(addrs.validity), cooldown = memory.readbyte(addrs.cooldown) }
+  end
+  return {
+    forward = pair(p.forward),
+    down    = pair(p.down),
+    air     = pair(p.air),
+    antiair = pair(p.antiair),
+  }
+end
+
 function M.read_select_state(player_id)
   local a = M.PLAYER_SELECT[player_id]
   return {

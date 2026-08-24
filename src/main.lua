@@ -75,9 +75,14 @@ local function before_frame()
     return
   end
 
-  -- TEMPORARY debug: verifying the Evo Moment 37 easter egg captures P1's
-  -- picked Super Art correctly. Remove once confirmed.
-  gui.text(10, 10, string.format("opponent_sa:%s", tostring(OpponentTracker.selected_sa)))
+  -- TEMPORARY debug: figuring out the semantics of the parry validity/
+  -- cooldown timers (never used before) by watching YOUR (P1) own values
+  -- while you manually parry something. Remove once understood.
+  local p1_parry = Memory.read_parry_timers(1)
+  gui.text(10, 10, string.format(
+    "P1 fwd v:%d c:%d  down v:%d c:%d",
+    p1_parry.forward.validity, p1_parry.forward.cooldown,
+    p1_parry.down.validity, p1_parry.down.cooldown))
 
   AI.decide(input)
   joypad.set(input)

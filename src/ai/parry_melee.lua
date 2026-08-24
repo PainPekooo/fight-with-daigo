@@ -11,17 +11,25 @@
 -- sweeps/low hits are crouching moves) — not perfect, but reasonable.
 --
 -- Easter egg: if the opponent is Chun-Li and picked SA2 (Houyoku Sen) at
--- character select, the attempt chance goes to 100% instead of 18% — the
--- Evo Moment 37 recreation. We originally tried to identify Houyoku Sen by
--- its exact action_state id using the reference repo's framedata as a
--- shortcut (candidate "5f54"), but a live test showed the real value
--- doesn't match that format at all — so instead we lean on the fact that a
--- character can only have one Super Art selected per match (see
--- opponent_tracker.lua): if she picked SA2, any super she throws for the
--- rest of the match IS Houyoku Sen, no move-fingerprinting needed. Since
--- this re-triggers on every rising edge of "opponent has an active attack
--- hitbox", it naturally re-attempts the parry on each hit of the flurry,
--- not just the first one.
+-- character select, Ken taps the parry direction repeatedly for as long as
+-- the hitbox stays active, instead of the normal single edge-triggered
+-- attempt — the Evo Moment 37 recreation. We originally tried to identify
+-- Houyoku Sen by its exact action_state id using the reference repo's
+-- framedata as a shortcut (candidate "5f54"), but a live test showed the
+-- real value doesn't match that format at all — so instead we lean on the
+-- fact that a character can only have one Super Art selected per match
+-- (see opponent_tracker.lua): if she picked SA2, any super she throws for
+-- the rest of the match IS Houyoku Sen, no move-fingerprinting needed.
+--
+-- The single-attempt version (used for every other melee threat) also
+-- turned out to be the wrong shape for a 15-hit flurry: it only fires on
+-- the rising edge of "has an active attack hitbox", so if that hitbox
+-- stays continuously active through the whole multi-hit super (rather than
+-- toggling between individual hits), the edge only happens ONCE for the
+-- entire flurry — one missed attempt and there's no retry for the
+-- remaining ~14 hits, which looked from the outside exactly like never
+-- attempting at all. Mashing for the whole duration instead gives many
+-- chances across the flurry.
 
 ParryMelee = {}
 
@@ -29,8 +37,18 @@ local ATTEMPT_CHANCE = 0.18
 local CHUNLI_SA2_INDEX = 1 -- 0-based: SA1=0, SA2=1, SA3=2 (same convention as ours)
 local was_threatened = false
 
+local MASH_CYCLE_FRAMES = 2 -- 1 tap, 1 release
+local mash_counter = 0
+
 local function is_evo_moment_37(opponent_state)
   return opponent_state.char_name == "chunli" and OpponentTracker.selected_sa == CHUNLI_SA2_INDEX
+end
+
+local function parry_direction(self_state, opponent_state)
+  if opponent_state.posture == Memory.POSTURE.CROUCHING then
+    return "P2 Down"
+  end
+  return AIUtil.forward_input(self_state, opponent_state)
 end
 
 function ParryMelee.decide(input)
@@ -39,11 +57,23 @@ function ParryMelee.decide(input)
 
   if AIUtil.is_jumping(self_state.posture) then
     was_threatened = false
+    mash_counter = 0
     return false
   end
 
   local threatened = Memory.has_active_attack_box(AIUtil.OPPONENT_ID)
     and not AIUtil.is_jumping(opponent_state.posture)
+
+  if threatened and is_evo_moment_37(opponent_state) then
+    was_threatened = true
+    mash_counter = (mash_counter + 1) % MASH_CYCLE_FRAMES
+    if mash_counter == 0 then
+      input[parry_direction(self_state, opponent_state)] = true
+      return true
+    end
+    return false
+  end
+  mash_counter = 0
 
   local just_started = threatened and not was_threatened
   was_threatened = threatened
@@ -52,16 +82,10 @@ function ParryMelee.decide(input)
     return false
   end
 
-  local attempt_chance = is_evo_moment_37(opponent_state) and 1.0 or ATTEMPT_CHANCE
-  if math.random() >= attempt_chance then
+  if math.random() >= ATTEMPT_CHANCE then
     return false -- let Block handle it this time, we don't attempt it
   end
 
-  if opponent_state.posture == Memory.POSTURE.CROUCHING then
-    input["P2 Down"] = true
-  else
-    input[AIUtil.forward_input(self_state, opponent_state)] = true
-  end
-
+  input[parry_direction(self_state, opponent_state)] = true
   return true
 end

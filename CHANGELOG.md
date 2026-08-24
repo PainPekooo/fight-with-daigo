@@ -2,6 +2,18 @@
 
 Notable changes to this project, most recent first.
 
+## Evo Moment 37 easter egg: fix mash-vs-single-attempt bug
+
+- Live-tested with `opponent_sa` debug confirmed correctly captured (1 =
+  SA2), but Ken still ate the whole Houyoku Sen. Cause: the parry attempt
+  only fired once, on the rising edge of "opponent has an active attack
+  hitbox" — if that hitbox stays continuously active through the whole
+  15-hit flurry instead of toggling per hit, that edge only happens once
+  for the entire super, so a single missed attempt meant no more retries
+  for the remaining hits. For this specific case, Ken now taps the parry
+  direction repeatedly for as long as the threat lasts, giving many chances
+  across the flurry instead of one.
+
 ## Evo Moment 37 easter egg
 
 - Guaranteed melee parry (100% instead of 18%) if the opponent is Chun-Li

@@ -35,9 +35,10 @@ local POKES = {
 -- for a stretch — so the approach isn't always a straight line forward.
 -- Reweighted for max difficulty ("al palo"): less walk/retreat, more
 -- dash/tatsu closing the gap fast. ANTI_ZONE is the "read": the more this
--- opponent throws projectiles (see opponent_reads.lua), the more the mix
--- shifts from BASE toward ANTI_ZONE -- rushing a zoner down instead of
--- walking into their fireballs at the same pace as against anyone else.
+-- opponent throws projectiles OR just plays keep-away on foot (see
+-- opponent_reads.lua's zoner/turtle -- whichever reads higher), the more
+-- the mix shifts from BASE toward ANTI_ZONE -- rushing down a runaway
+-- opponent instead of closing at the same pace as against anyone else.
 -- Both tables sum to 1.0 so the blend between them does too.
 local APPROACH_OPTIONS = { "walk", "tatsu", "dash", "jump", "retreat" }
 local APPROACH_WEIGHTS_BASE = { walk = 0.25, tatsu = 0.20, dash = 0.30, jump = 0.15, retreat = 0.10 }
@@ -71,12 +72,12 @@ end
 local REPEAT_DISCOUNT = 0.15
 
 local function pick_approach_mode()
-  local zoner_read = OpponentReads.zoner()
+  local anti_zone_read = math.max(OpponentReads.zoner(), OpponentReads.turtle())
   local roll = math.random()
   local acc = 0
   for _, name in ipairs(APPROACH_OPTIONS) do
     local base, anti_zone = APPROACH_WEIGHTS_BASE[name], APPROACH_WEIGHTS_ANTI_ZONE[name]
-    local weight = base + (anti_zone - base) * zoner_read
+    local weight = base + (anti_zone - base) * anti_zone_read
     if name == last_approach_mode then
       weight = weight * REPEAT_DISCOUNT
     end

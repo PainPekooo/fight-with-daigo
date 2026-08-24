@@ -26,6 +26,14 @@ local PROJECTILE_SATURATION = 4
 local projectile_count = 0
 local seen_projectile_bases = {}
 
+-- --- Turtle: retreats (walks backward) a lot, with or without a
+-- projectile behind it -> close the gap more aggressively too. Broader
+-- than the zoner read: covers a keep-away playstyle from a character with
+-- no fireball, which zoner wouldn't ever pick up on.
+local RETREAT_SATURATION = 6
+local retreat_episode_count = 0
+local was_retreating = false
+
 function OpponentReads.update()
   if not Memory.is_round_active() then
     return
@@ -42,6 +50,14 @@ function OpponentReads.update()
     end
   end
   was_jumping = jumping
+
+  -- Edge-detect entering WALK_BACK, so a single sustained retreat counts
+  -- once, not once per frame it lasts.
+  local retreating = opponent_state.posture == Memory.POSTURE.WALK_BACK
+  if retreating and not was_retreating then
+    retreat_episode_count = math.min(retreat_episode_count + 1, RETREAT_SATURATION)
+  end
+  was_retreating = retreating
 
   -- Edge-detect "new" projectiles by object slot address: a projectile
   -- keeps the same base address for its whole lifetime, so anything not in
@@ -66,4 +82,9 @@ end
 -- 0..1: how confident we are that this opponent zones with projectiles.
 function OpponentReads.zoner()
   return projectile_count / PROJECTILE_SATURATION
+end
+
+-- 0..1: how confident we are that this opponent plays keep-away/turtle.
+function OpponentReads.turtle()
+  return retreat_episode_count / RETREAT_SATURATION
 end

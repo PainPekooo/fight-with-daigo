@@ -125,14 +125,16 @@ without touching the controller. During the match:
   a character can only have one Super Art per match, knowing she picked
   SA2 is enough.
 
-- **Reads**: tracks a couple of live tendencies for the whole session (not
-  just the current round), and counters them harder the more they show up
-  — jumping in close a lot pushes anti-air toward near-certain, near-instant
-  shoryuken; throwing a lot of projectiles pushes footsies to close the
-  distance (dash/tatsumaki) instead of walking or backing off. Not a
-  game-tree/minimax search — that needs simulating the opponent's future
-  moves, which isn't possible live against an unknown human — closer to a
-  human player noticing a habit after a few repeats and leaning on it.
+- **Reads**: tracks a few live tendencies for the whole session (not just
+  the current round), and counters them harder the more they show up —
+  jumping in close a lot pushes anti-air toward near-certain, near-instant
+  shoryuken; throwing a lot of projectiles, or just walking backward a lot
+  (a keep-away playstyle with no fireball involved), both push footsies to
+  close the distance (dash/tatsumaki) instead of walking or backing off at
+  the same pace as against anyone else. Not a game-tree/minimax search —
+  that needs simulating the opponent's future moves, which isn't possible
+  live against an unknown human — closer to a human player noticing a
+  habit after a few repeats and leaning on it.
   Predictive blocking (see above) uses the same "learn it live" approach:
   no external framedata, just remembering what it's already measured
   against this opponent this session.

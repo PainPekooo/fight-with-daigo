@@ -2,6 +2,23 @@
 
 Notable changes to this project, most recent first.
 
+## Add a third read: turtle/keep-away (not just projectile zoning)
+
+- New tendency in `opponent_reads.lua`: counts episodes of the opponent
+  walking backward (`WALK_BACK` posture), saturating like the existing
+  reads. Broader than the zoner read — picks up a keep-away playstyle even
+  from a character with no fireball to detect.
+- `footsies.lua`'s approach-mode picker now blends toward closing the
+  distance (dash/tatsumaki) based on `max(zoner, turtle)` instead of just
+  `zoner` — either signal alone is enough to trigger the same "stop letting
+  them dictate range" response.
+- Considered and skipped two other candidates: a "jumps out of wakeup"
+  read (likely redundant — AntiAir already has priority over WakeupMixup
+  and should already catch it) and a "favorite poke" read (would need
+  per-character move-name identification, the same scope/licensing
+  question already resolved against for framedata — see the effie3rd
+  entries below).
+
 ## Investigated "precise" parry gating — mapped the data, reverted the gate
 
 - Cross-checked effie3rd/3rd_training_lua's `memory_addresses.lua`

@@ -42,9 +42,13 @@ function AI.decide(input)
   -- always get met with the same telegraphed throw attempt.
   if WakeupMixup.decide(input) then return "wakeup mixup" end
 
-  if Footsies.decide(input) then
-    return "footsies: " .. Footsies.debug_action()
-  end
+  -- TEMPORARY: Footsies disabled while investigating parry timing (see
+  -- main.lua's debug) — Ken kept walking around mid-test, making it hard
+  -- to set up a clean repeated fireball-from-a-fixed-distance test.
+  -- Re-enable once that's done.
+  -- if Footsies.decide(input) then
+  --   return "footsies: " .. Footsies.debug_action()
+  -- end
 
   if ThrowTech.decide(input) then
     return "throw tech"

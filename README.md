@@ -2,7 +2,45 @@
 
 ![Fight with Daigo](docs/banner.png)
 
-A mod for **Street Fighter III: 3rd Strike** (Fightcade v2.0.91 / FBNeo, ROM `sfiii3nr1` "Japan 990512").
+Remember [Evo Moment 37](https://en.wikipedia.org/wiki/Evo_Moment_37) — the
+most famous parry in fighting game history? This is a Lua mod for **Street
+Fighter III: 3rd Strike** that puts an AI-controlled Ken in your corner,
+built to fight with that same philosophy: it reads your patterns, punishes
+your whiffs, blocks everything you throw at it, and every so often, mid-hit,
+goes for the parry. Not another generic hard CPU — a rule-based bot built by
+reading the game's memory live, made specifically to fight like Daigo
+Umehara.
+
+## How to install & run
+
+1. **Get the ROM.** You need a legitimate `sfiii3nr1` (Japan 990512) ROM
+   yourself — it is not included or distributed in this repo. Place it
+   where Fightcade expects its FBNeo ROMs.
+2. **Download this repo.** Either `git clone` it or download the ZIP from
+   GitHub and extract it anywhere on disk — the folder location doesn't
+   matter, `main.lua` locates its sibling files by its own path.
+3. **Launch Fightcade** and start the game (`Street Fighter III: 3rd
+   Strike - sfiii3nr1`) in a **2-player / Free Play** match. This mod
+   drives P2 like a bot standing in for a second human — you play P1, and
+   don't need to touch P2's controls at all (character select included).
+4. **Load the script**: `Game -> Lua Scripting -> New Lua Script Window`,
+   then `Browse...` and pick `src/main.lua` from where you downloaded this
+   repo, and `Run`.
+5. **Play.** P2 auto-joins, auto-selects Ken (white gi) and his Super Art,
+   and the AI takes over from there for the whole match — no further input
+   needed on P2's side.
+
+**Running Fightcade as a Flatpak on Linux?** Its sandbox can't see your
+real filesystem by default, so the file browser may show your project
+folder as empty. Either copy `src/` into a location the sandbox already
+has access to (its own data directory under `~/.var/app/com.fightcade.Fightcade/`),
+or grant it access to your project folder specifically and restart
+Fightcade completely for it to take effect:
+```
+flatpak override --user --filesystem="/path/to/fight-with-daigo" com.fightcade.Fightcade
+```
+
+## About the mod
 
 A Lua script that, in two-player mode, controls P2 as Ken (white gi) via a
 rule-based bot that reads the game state from RAM and decides inputs frame
@@ -73,35 +111,6 @@ across 121 frames — matches the profile) but it's not confirmed live yet.
 - A legitimate `sfiii3nr1` (Japan 990512) ROM — **not distributed here, get
   your own**
 - Lua Scripting enabled in the emulator
-
-## How to install & run
-
-1. **Get the ROM.** You need a legitimate `sfiii3nr1` (Japan 990512) ROM
-   yourself — it is not included or distributed in this repo. Place it
-   where Fightcade expects its FBNeo ROMs.
-2. **Download this repo.** Either `git clone` it or download the ZIP from
-   GitHub and extract it anywhere on disk — the folder location doesn't
-   matter, `main.lua` locates its sibling files by its own path.
-3. **Launch Fightcade** and start the game (`Street Fighter III: 3rd
-   Strike - sfiii3nr1`) in a **2-player / Free Play** match. This mod
-   drives P2 like a bot standing in for a second human — you play P1, and
-   don't need to touch P2's controls at all (character select included).
-4. **Load the script**: `Game -> Lua Scripting -> New Lua Script Window`,
-   then `Browse...` and pick `src/main.lua` from where you downloaded this
-   repo, and `Run`.
-5. **Play.** P2 auto-joins, auto-selects Ken (white gi) and his Super Art,
-   and the AI takes over from there for the whole match — no further input
-   needed on P2's side.
-
-**Running Fightcade as a Flatpak on Linux?** Its sandbox can't see your
-real filesystem by default, so the file browser may show your project
-folder as empty. Either copy `src/` into a location the sandbox already
-has access to (its own data directory under `~/.var/app/com.fightcade.Fightcade/`),
-or grant it access to your project folder specifically and restart
-Fightcade completely for it to take effect:
-```
-flatpak override --user --filesystem="/path/to/fight-with-daigo" com.fightcade.Fightcade
-```
 
 ## Structure
 

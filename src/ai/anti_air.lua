@@ -65,8 +65,24 @@ function AntiAir.decide(input)
   local self_state = Memory.read_player_state(AIUtil.SELF_ID)
   local opponent_state = Memory.read_player_state(AIUtil.OPPONENT_ID)
 
+  -- "Reads": the more this opponent has jumped in close (see
+  -- opponent_reads.lua), the wider we watch for it, the less we hesitate,
+  -- and the harder we commit to the shoryuken instead of the safer normal
+  -- anti-air -- countering the specific habit instead of reacting the same
+  -- way regardless of who's playing. SRK/EX chance still don't reach 1.0
+  -- even at max confidence, so it stays a (very likely) gamble, not a
+  -- guaranteed reflex.
+  local jump_read = OpponentReads.jump_happy()
+  local effective_range = ANTI_AIR_RANGE + jump_read * 20
+  local effective_delay_max = math.max(
+    REACTION_DELAY_MIN,
+    REACTION_DELAY_MAX - math.floor(jump_read * (REACTION_DELAY_MAX - REACTION_DELAY_MIN + 1))
+  )
+  local effective_srk_chance = SRK_CHANCE + (1 - SRK_CHANCE) * jump_read * 0.8
+  local effective_ex_chance = math.min(1, EX_CHANCE + jump_read * 0.3)
+
   if srk_step == 0 then
-    local in_range = math.abs(self_state.pos_x - opponent_state.pos_x) <= ANTI_AIR_RANGE
+    local in_range = math.abs(self_state.pos_x - opponent_state.pos_x) <= effective_range
     local triggered = AIUtil.is_jumping(opponent_state.posture) and in_range
 
     if not triggered then
@@ -75,7 +91,7 @@ function AntiAir.decide(input)
     end
 
     if pending_delay == nil then
-      pending_delay = math.random(REACTION_DELAY_MIN, REACTION_DELAY_MAX)
+      pending_delay = math.random(REACTION_DELAY_MIN, effective_delay_max)
     end
 
     if pending_delay > 0 then
@@ -85,7 +101,7 @@ function AntiAir.decide(input)
 
     pending_delay = nil
 
-    if math.random() >= SRK_CHANCE then
+    if math.random() >= effective_srk_chance then
       -- normal anti-air instead of shoryuken: a single HP frame is enough,
       -- no motion sequence needed.
       input["P2 Strong Punch"] = true
@@ -94,7 +110,7 @@ function AntiAir.decide(input)
     end
 
     srk_step = 1
-    if self_state.gauge >= 1 and math.random() < EX_CHANCE then
+    if self_state.gauge >= 1 and math.random() < effective_ex_chance then
       current_punch = "EX"
     else
       current_punch = PUNCH_OPTIONS[math.random(#PUNCH_OPTIONS)]

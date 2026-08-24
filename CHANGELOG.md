@@ -2,6 +2,26 @@
 
 Notable changes to this project, most recent first.
 
+## Add opponent "reads" (lightweight profiling, not a game-tree search)
+
+- New `opponent_reads.lua`: tracks two live tendencies for the whole
+  session (persists across rounds/matches, not reset each round) — how
+  often the opponent jumps in close, and how often they throw projectiles
+  — as simple saturating counters (a handful of repeats is enough to act
+  on, not statistical significance).
+- Anti-air now scales its range, reaction delay, shoryuken chance, and EX
+  chance up as the "jumps in a lot" read climbs — against a jump-happy
+  opponent it converges on a near-instant, near-certain DP instead of the
+  same 75%/0-1-frame baseline used against everyone.
+- Footsies now blends its approach-mode weights toward closing the
+  distance fast (dash/tatsumaki, less walk/retreat) as the "zones a lot"
+  read climbs, instead of walking into fireballs at a fixed pace.
+- Considered and ruled out a real decision-tree/minimax search: that needs
+  simulating the opponent's future moves, which isn't possible live
+  against an unknown human (no rewind/save-state the way TAS tools use to
+  get "perfect" play — those aren't reactive AI, they're offline
+  rerecording against a known/fixed opponent).
+
 ## Max difficulty pass ("al palo")
 
 - Re-enabled Footsies (had been temporarily commented out while debugging

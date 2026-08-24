@@ -77,13 +77,14 @@ actually modeling reads/opponent profiling, which remains a TODO.
 Functional as a prototype. P2 auto-selects itself (Ken, white gi, SA3)
 without touching the controller. During the match:
 
-- Reactive anti-air: shoryuken (random LP/MP/HP, EX if there's meter) 60%
+- Reactive anti-air: shoryuken (random LP/MP/HP, EX if there's meter) 75%
   of the time, a normal anti-air (st.HP) the rest — so it's not 100%
-  predictable or always air-parryable — with cooldown and a random delay.
+  predictable or always air-parryable — with cooldown and a near-instant
+  reaction delay.
 - Melee blocking (based on a real attack hitbox, not distance, crouching
   only for lows) and standing blocking against hadoukens (reads the
   projectile list), with a parry attempt before blocking (always against
-  projectiles; occasional — 18% — against melee hits, the nod to Evo Moment
+  projectiles; occasional — 40% — against melee hits, the nod to Evo Moment
   37, with Block as a fallback if it fails).
   Known limitation: reacting only once the hit is already active means
   there's no lead time — a fast enough move (in this game, "close" normals
@@ -115,9 +116,17 @@ without touching the controller. During the match:
   a character can only have one Super Art per match, knowing she picked
   SA2 is enough.
 
-TODO: actually model reads/opponent profiling (beyond the reaction delay
-and whiff punish), more research into real sources about Daigo to replace
-the generic parameters that remain.
+- **Reads**: tracks a couple of live tendencies for the whole session (not
+  just the current round), and counters them harder the more they show up
+  — jumping in close a lot pushes anti-air toward near-certain, near-instant
+  shoryuken; throwing a lot of projectiles pushes footsies to close the
+  distance (dash/tatsumaki) instead of walking or backing off. Not a
+  game-tree/minimax search — that needs simulating the opponent's future
+  moves, which isn't possible live against an unknown human — closer to a
+  human player noticing a habit after a few repeats and leaning on it.
+
+TODO: more research into real sources about Daigo to replace the generic
+parameters that remain.
 
 ## Requirements
 

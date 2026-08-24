@@ -34,9 +34,14 @@ local POKES = {
 -- often). "retreat" is the exception: instead of closing in, it backs off
 -- for a stretch — so the approach isn't always a straight line forward.
 -- Reweighted for max difficulty ("al palo"): less walk/retreat, more
--- dash/tatsu closing the gap fast.
+-- dash/tatsu closing the gap fast. ANTI_ZONE is the "read": the more this
+-- opponent throws projectiles (see opponent_reads.lua), the more the mix
+-- shifts from BASE toward ANTI_ZONE -- rushing a zoner down instead of
+-- walking into their fireballs at the same pace as against anyone else.
+-- Both tables sum to 1.0 so the blend between them does too.
 local APPROACH_OPTIONS = { "walk", "tatsu", "dash", "jump", "retreat" }
-local APPROACH_WEIGHTS = { walk = 0.25, tatsu = 0.20, dash = 0.30, jump = 0.15, retreat = 0.10 }
+local APPROACH_WEIGHTS_BASE = { walk = 0.25, tatsu = 0.20, dash = 0.30, jump = 0.15, retreat = 0.10 }
+local APPROACH_WEIGHTS_ANTI_ZONE = { walk = 0.10, tatsu = 0.30, dash = 0.45, jump = 0.10, retreat = 0.05 }
 
 local RETREAT_APPROACH_FRAMES_MIN = 15
 local RETREAT_APPROACH_FRAMES_MAX = 30
@@ -56,10 +61,12 @@ local function apply_poke(input, poke)
 end
 
 local function pick_approach_mode()
+  local zoner_read = OpponentReads.zoner()
   local roll = math.random()
   local acc = 0
   for _, name in ipairs(APPROACH_OPTIONS) do
-    acc = acc + APPROACH_WEIGHTS[name]
+    local base, anti_zone = APPROACH_WEIGHTS_BASE[name], APPROACH_WEIGHTS_ANTI_ZONE[name]
+    acc = acc + base + (anti_zone - base) * zoner_read
     if roll <= acc then
       return name
     end

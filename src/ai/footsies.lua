@@ -10,7 +10,13 @@
 
 Footsies = {}
 
-local POKE_RANGE_MIN = 60  -- below this it doesn't advance (close-range defense already covers it)
+-- Used to gate poking on dist >= POKE_RANGE_MIN too ("below this it
+-- doesn't advance, close-range defense already covers it") -- but that
+-- left Ken doing NOTHING but mashing ThrowTech at point-blank range for
+-- long stretches (live-tested, reported: Ken standing there doing nothing
+-- else for 80+ frames at a time). The "doesn't advance" part still holds
+-- (see the dist > POKE_RANGE_MAX branch below), it's only poking itself
+-- that no longer has a lower bound.
 local POKE_RANGE_MAX = 100 -- above this it closes the distance
 local POKE_HOLD_FRAMES = 2
 -- Shrunk from 30 to 18 for max difficulty ("al palo") -- pokes come out
@@ -205,7 +211,7 @@ function Footsies.decide(input)
 
   reset_approach()
 
-  if dist >= POKE_RANGE_MIN and poke_cooldown == 0 then
+  if poke_cooldown == 0 then
     current_poke = POKES[math.random(#POKES)]
     poke_hold = POKE_HOLD_FRAMES - 1 -- this frame already counts as the first one
     poke_cooldown = POKE_COOLDOWN_FRAMES

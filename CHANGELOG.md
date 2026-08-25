@@ -2,6 +2,83 @@
 
 Notable changes to this project, most recent first.
 
+## Give ComboPunish top priority — it was getting interrupted mid-sequence
+
+- The `PUNISH_RANGE` fix (below) wasn't the whole story: live feedback was
+  "Ken sometimes just stands there" during whiff-punish attempts instead
+  of attacking at all — not every attempt, some connected an animation but
+  missed, matching a second, separate bug.
+- `ComboPunish` sat below `AntiAir`/`ParryFireball`/`ParryMelee` in
+  `decide.lua`'s priority order. Since those get checked every frame
+  regardless of what else is going on, any of them grabbing a frame
+  mid-sequence (most plausibly `ParryFireball`, if the whiffed move that
+  triggered the punish was itself a projectile still lingering nearby)
+  would drop the held starter button for that frame and silently corrupt
+  the input — exactly matching "sometimes just stands there."
+- Moved `ComboPunish` to the very top of `decide.lua`'s priority, ahead of
+  `AntiAir` — the same exclusivity `AntiAir` already gets for its own
+  multi-frame shoryuken sequence, for the same reason. Trade-off: for the
+  ~10 frames a combo punish is executing, Ken can't react to a jump-in or
+  incoming fireball. Accepted — a combo that reliably starts beats one
+  that's frequently corrupted.
+- Not fully confirmed working yet — still gathering live data.
+
+## Fix whiff-punish combos never connecting
+
+- Diagnosed the "supers never connect" report with `tools/match_logger.lua`
+  (extended it to force a log line every single frame while `ComboPunish`
+  is active, instead of only on change, to catch the fine-grained
+  sequence). Result: not a super-specific issue -- in every whiff-punish
+  attempt across a full recorded set, NOT EVEN THE STARTER connected;
+  several showed the distance growing rather than shrinking through the
+  combo window.
+- Root cause: `PUNISH_RANGE` (widened from 100 to 130 in the earlier
+  difficulty pass, without checking it against the starters' real reach)
+  was starting the whole combo from outside cr.MK/cr.MP's actual hit
+  range. Checked the real hitboxes in the local reference framedata this
+  time: cr.MK's farthest active box reaches ~78 from Ken's own center,
+  cr.MP's ~70; adding the opponent's own half-width puts real connect
+  range around 100-108. Set `PUNISH_RANGE` back to 100.
+- Removed the temporary per-frame debug from `combo_punish.lua` now that
+  it's diagnosed -- `tools/match_logger.lua` covers the same granularity
+  going forward, without needing print statements in the shipped code.
+
+## Make HP shoryuken rare in anti-air's punch pick
+
+- Reported live: HP shoryuken does noticeably less damage than LP/MP in
+  this game -- more of a chip/pressure tool than a real anti-air punish.
+  `anti_air.lua`'s punch choice was an equal 1-in-3 roll between LP/MP/HP;
+  weighted it down to a rare 5% instead of removing it outright (kept for
+  variety, just not routine).
+- Also added debug logging to `combo_punish.lua` (every frame while the
+  combo is active, not just on change) chasing a separate reported issue:
+  whiff-punish supers not connecting. Not diagnosed yet -- suspect
+  `PUNISH_RANGE` (widened to 130 in the difficulty pass) may now be wider
+  than cr.MK/cr.MP's actual hit range, starting the whole punish combo
+  from too far for even the starter to land.
+
+## Fix Footsies doing nothing at point-blank range
+
+- New tool: `tools/match_logger.lua` — a copy of `main.lua`'s real bot
+  control loop that also writes a structured log (what the bot decided
+  each notable frame, both players' state) to a file, so a played session
+  can be reviewed without pasting console output. Used it on a full
+  recorded set against the bot and read the log directly.
+- Found long stretches (one over 80 frames) where Ken did nothing but mash
+  `ThrowTech`'s tech input at point-blank range — `Footsies` had a lower
+  bound (`POKE_RANGE_MIN`) below which it wouldn't poke at all, on the
+  theory that close-range defense already covered it. Removed the lower
+  bound: pokes now fire at any range up to `POKE_RANGE_MAX`, so ThrowTech's
+  mash (which also doubles as Ken's own throw attempts, by design — see
+  `throw_tech.lua`) isn't the only thing happening up close anymore.
+- Also investigated periodic small damage ticks that lined up suspiciously
+  well with ThrowTech's mash — turned out to be working as designed, not a
+  bug: the tech input (LP+LK) doubles as Ken's own throw whenever the
+  opponent isn't actually grabbing, already documented in `throw_tech.lua`.
+  Confirmed with the user this felt like grab-spam specifically because
+  Footsies wasn't contributing anything else at that range — the poke fix
+  above should already dilute it without touching the throw logic itself.
+
 ## Fix gauge/meter_count swap — Super Art was firing without real meter
 
 - Live-tested the new cr.MP combo starter and it "didn't do the combo" —

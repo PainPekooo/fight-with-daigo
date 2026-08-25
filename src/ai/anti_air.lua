@@ -34,10 +34,26 @@ local REACTION_DELAY_MIN = 0
 local REACTION_DELAY_MAX = 1
 local pending_delay = nil
 
--- Variety: not always HP (the flashiest/strongest, with the most hits).
--- LP and MP are also a valid shoryuken, only the button changes.
+-- Variety: not always the same button. Used to be an equal 1-in-3 roll,
+-- but HP shoryuken was reported live as doing noticeably less damage than
+-- LP/MP in this game -- more of a chip/pressure tool than a real punish --
+-- so it's now a rare pick instead of removed outright (still comes out
+-- occasionally, for variety, just not routinely).
 local PUNCH_OPTIONS = { "P2 Weak Punch", "P2 Medium Punch", "P2 Strong Punch" }
+local PUNCH_WEIGHTS = { ["P2 Weak Punch"] = 0.48, ["P2 Medium Punch"] = 0.47, ["P2 Strong Punch"] = 0.05 }
 local current_punch = nil
+
+local function pick_punch()
+  local roll = math.random()
+  local acc = 0
+  for _, name in ipairs(PUNCH_OPTIONS) do
+    acc = acc + PUNCH_WEIGHTS[name]
+    if roll <= acc then
+      return name
+    end
+  end
+  return PUNCH_OPTIONS[1]
+end
 
 -- More important variety: not always shoryuken. A repeated DP is always
 -- 100% predictable (can be air-parried with certainty, knowing it's
@@ -113,7 +129,7 @@ function AntiAir.decide(input)
     if self_state.gauge >= 1 and math.random() < effective_ex_chance then
       current_punch = "EX"
     else
-      current_punch = PUNCH_OPTIONS[math.random(#PUNCH_OPTIONS)]
+      current_punch = pick_punch()
     end
   end
 

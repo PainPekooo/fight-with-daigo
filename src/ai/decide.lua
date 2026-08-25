@@ -1,4 +1,17 @@
 -- AI orchestrator: calls each rule in priority order.
+-- ComboPunish goes first, ahead of even AntiAir: it's a multi-frame input
+-- sequence (starter + special) just like AntiAir's shoryuken, and used to
+-- sit below AntiAir/ParryFireball/ParryMelee in priority -- meaning any of
+-- those three grabbing a frame mid-sequence (e.g. ParryFireball firing
+-- because the whiffed move that triggered the punish was itself a
+-- projectile still lingering nearby) would drop the held button for that
+-- frame and silently break the input. Live-reported as Ken "sometimes just
+-- standing there" during whiff-punish attempts instead of attacking at
+-- all -- not a range/timing issue, an interrupted-sequence one. The
+-- tradeoff: for the ~10 frames a combo punish is executing, Ken can't
+-- react to a jump-in or a fireball that shows up mid-combo. Accepted --
+-- a combo that reliably starts beats one that's frequently corrupted.
+--
 -- AntiAir is exclusive during its active frames (mixing in another input
 -- breaks the shoryuken sequence). Same for ParryFireball and ParryMelee: if
 -- they tap "forward"/"down" that frame, it must not mix with Block's
@@ -20,15 +33,16 @@ AI = {}
 -- Also returns a readable label describing what it did, to show on screen
 -- without having to dump each rule's internal state.
 function AI.decide(input)
-  if AntiAir.decide(input) then return "shoryuken (anti-air)" end
-  if ParryFireball.decide(input) then return "parry (hadouken)" end
-  if ParryMelee.decide(input) then return "parry (melee)" end
-
   -- If the punish combo is already underway (started by WhiffPunish), keep
-  -- finishing its sequence (starter + special) before anything else.
+  -- finishing its sequence (starter + special) before anything else --
+  -- see the top-of-file comment for why this now goes before AntiAir too.
   if ComboPunish.active() and ComboPunish.decide(input) then
     return "combo punish"
   end
+
+  if AntiAir.decide(input) then return "shoryuken (anti-air)" end
+  if ParryFireball.decide(input) then return "parry (hadouken)" end
+  if ParryMelee.decide(input) then return "parry (melee)" end
 
   if Block.has_threat() then
     if Block.decide(input) then

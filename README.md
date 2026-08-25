@@ -77,10 +77,11 @@ actually modeling reads/opponent profiling, which remains a TODO.
 Functional as a prototype. P2 auto-selects itself (Ken, white gi, SA3)
 without touching the controller. During the match:
 
-- Reactive anti-air: shoryuken (random LP/MP/HP, EX if there's meter) 75%
-  of the time, a normal anti-air (st.HP) the rest — so it's not 100%
-  predictable or always air-parryable — with cooldown and a near-instant
-  reaction delay.
+- Reactive anti-air: shoryuken (mostly LP/MP, HP rare — reported live as
+  the weakest of the three, more of a chip tool than a real punish; EX if
+  there's meter) 75% of the time, a normal anti-air (st.HP) the rest — so
+  it's not 100% predictable or always air-parryable — with cooldown and a
+  near-instant reaction delay.
 - Melee blocking (based on a real attack hitbox, not distance, crouching
   only for lows) and standing blocking against hadoukens (reads the
   projectile list), with a parry attempt before blocking — 50% against
@@ -102,7 +103,11 @@ without touching the controller. During the match:
   input. The throw attempt itself is a short bounded burst, not a mash for
   the whole knockdown window — live-tested and reported as an obvious tell
   that let a reversal shoryuken always beat it.
-- **Whiff punish**: punishes the opponent the instant they enter recovery,
+- **Whiff punish**: punishes the opponent the instant they enter recovery
+  and within real range (100 — widened to 130 during a difficulty pass at
+  one point without checking it against the starters' actual reach, which
+  made the whole combo start too far out to ever connect; checked the real
+  hitboxes in the local reference framedata and brought it back down),
   with a combo (cr.MK or cr.MP, picked at random, canceled into Super Art
   if there's meter, or into shoryuken if not) instead of a single hit —
   the whiff-punish idea itself is the only rule based on real research
@@ -113,11 +118,14 @@ without touching the controller. During the match:
 - Footsies: closes the distance (walking, dashing, tatsumaki, offensive
   jump, or holding ground at random — not always a straight line forward,
   and discounted from repeating the same one twice in a row) and pokes
-  (random cr.MK / cr.MP / st.MP) when the opponent enters range, with an
-  occasional step back after poking. EX tatsumaki is rare (10%) rather than
-  routine — it spends the same meter Whiff Punish needs for a Super Art
-  punish, so burning it just to close distance was reported as costing the
-  bigger payoff.
+  (random cr.MK / cr.MP / st.MP) once in range, all the way down to
+  point-blank — used to stop poking below a minimum range on the theory
+  that close-range defense already covered it, but that just left Ken
+  doing nothing but mashing throw-tech at point-blank for long stretches
+  (reported live), with an occasional step back after poking. EX tatsumaki
+  is rare (10%) rather than routine — it spends the same meter Whiff
+  Punish needs for a Super Art punish, so burning it just to close
+  distance was reported as costing the bigger payoff.
 - **Easter egg**: if the opponent is Chun-Li and picked SA2 (Houyoku Sen)
   at character select, the melee parry attempt chance goes to 100% instead
   of 18% — the Evo Moment 37 recreation. Doesn't fingerprint the specific

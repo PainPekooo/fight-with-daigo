@@ -4,3 +4,7 @@
 # ROMs are never committed
 *.zip
 *.29f400.*
+
+# Generated output from tools/, not source
+/tools/replay_log.txt
+/tools/match_log.txt

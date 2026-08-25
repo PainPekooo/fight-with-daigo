@@ -13,9 +13,19 @@
 
 WhiffPunish = {}
 
--- Widened from 100 to 130 for max difficulty ("al palo") -- catches whiffs
--- from a bit further out.
-local PUNISH_RANGE = 130
+-- Widened from 100 to 130 for max difficulty ("al palo") without checking
+-- it against the starters' real reach -- live logging (tools/match_logger.lua,
+-- forced per-frame during ComboPunish) showed EVERY whiff-punish attempt
+-- in a full recorded set connected with nothing, not even the starter, and
+-- several showed distance growing rather than shrinking through the
+-- window. Checked the actual hitboxes in the local reference framedata:
+-- cr.MK's (b0e8) farthest active box reaches ~78 from Ken's own center,
+-- cr.MP's (aeb8) ~70 -- add the opponent's own half-width (~30, see
+-- KEN_HALF_WIDTH in parry_fireball.lua as the same-ballpark reference) and
+-- real connect range tops out around 100-108. 130 was starting the combo
+-- from well outside even the longer starter's reach. Back to 100 -- turns
+-- out that was already a reasonable number, just never verified.
+local PUNISH_RANGE = 100
 local was_recovering = false
 
 function WhiffPunish.decide(input)

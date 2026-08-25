@@ -115,6 +115,9 @@ without touching the controller. During the match:
   bread-and-butter (cited in `combo_punish.lua`), not generic fundamentals.
   The cancel timing still isn't confirmed live — we don't know for sure
   whether either one connects as a real combo or as two separate hits.
+  Bails out before the finisher if the starter clearly whiffed (opponent's
+  life hasn't dropped) instead of always committing to the full special —
+  used to leave Ken free to be reversal-punished on a whiffed Super Art.
 - Footsies: closes the distance (walking, dashing, tatsumaki, offensive
   jump, or holding ground at random — not always a straight line forward,
   and discounted from repeating the same one twice in a row) and pokes

@@ -2,6 +2,21 @@
 
 Notable changes to this project, most recent first.
 
+## Abort the punish combo's finisher if the starter clearly whiffed
+
+- Reported live as an exploitable pattern: after Ken threw a whiffed Super
+  Art / shoryuken finisher, he was reliably free to punish with a
+  reversal — `ComboPunish` used to always commit to the special the
+  instant the starter's cancel window closed, with no check on whether
+  the starter actually connected. On a whiff (common, see the range fix
+  below), Ken would still throw out the full special in the open, eating
+  the recovery for free.
+- Now checks the opponent's life right as the cancel window closes: if it
+  hasn't dropped since the combo started, bails to idle instead of
+  committing to the special. Doesn't fix the underlying "starter often
+  whiffs" issue (still being chased), but stops turning that whiff into a
+  second, bigger liability on top.
+
 ## Give ComboPunish top priority — it was getting interrupted mid-sequence
 
 - The `PUNISH_RANGE` fix (below) wasn't the whole story: live feedback was

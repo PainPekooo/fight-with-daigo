@@ -42,6 +42,7 @@ local frame_in_phase = 0
 local use_super = false
 local srk_step = 0
 local current_starter = nil
+local opponent_life_at_start = nil
 
 function ComboPunish.active()
   return phase ~= "idle"
@@ -53,6 +54,7 @@ function ComboPunish.start(super_available)
     frame_in_phase = 0
     use_super = super_available
     current_starter = STARTERS[math.random(#STARTERS)]
+    opponent_life_at_start = Memory.read_player_state(AIUtil.OPPONENT_ID).life
   end
 end
 
@@ -105,6 +107,16 @@ function ComboPunish.decide(input)
     input["P2 Down"] = true -- stays crouched, the starter's posture
     frame_in_phase = frame_in_phase + 1
     if frame_in_phase >= current_starter.wait_frames then
+      -- Bail instead of committing to the special if the starter clearly
+      -- whiffed (opponent's life hasn't dropped since we started) --
+      -- reported live: Ken throwing the full shoryuken/Super Art motion
+      -- out anyway on a whiffed starter, eating a free punish for the
+      -- recovery instead of just not attacking.
+      local opponent_state = Memory.read_player_state(AIUtil.OPPONENT_ID)
+      if opponent_state.life >= opponent_life_at_start then
+        phase = "idle"
+        return false
+      end
       phase = "special"
       if use_super then
         SuperArt.start()

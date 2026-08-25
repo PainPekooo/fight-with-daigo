@@ -28,6 +28,18 @@ WhiffPunish = {}
 local PUNISH_RANGE = 100
 local was_recovering = false
 
+-- Shippu Jinraikyaku (SA3, Ken's forced default -- see M.KEN_DEFAULT_SA)
+-- costs 3 full bars in 3rd Strike specifically (2 in New Generation, where
+-- it's cheaper) -- per arcade-fighter.com's SF3 Ken guide
+-- (https://www.arcade-fighter.com/af/guias/saga-street-fighter-iii/sfiii-ken.php).
+-- We'd been checking `gauge >= 1` this whole time -- checked our own live
+-- logs (tools/match_logger.lua) and gauge never once reached 3 across a
+-- full session, meaning every "combo punish" that tried the Super Art was
+-- always short on real meter, matching the "never connects" pattern
+-- chased all session. This is the actual root cause; the range/priority
+-- fixes above were real bugs too but not the whole story.
+local SUPER_ART_METER_COST = 3
+
 function WhiffPunish.decide(input)
   local self_state = Memory.read_player_state(AIUtil.SELF_ID)
   local opponent_state = Memory.read_player_state(AIUtil.OPPONENT_ID)
@@ -50,6 +62,6 @@ function WhiffPunish.decide(input)
     return false
   end
 
-  ComboPunish.start(self_state.gauge >= 1)
+  ComboPunish.start(self_state.gauge >= SUPER_ART_METER_COST)
   return ComboPunish.decide(input)
 end

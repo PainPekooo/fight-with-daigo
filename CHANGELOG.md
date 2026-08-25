@@ -2,6 +2,23 @@
 
 Notable changes to this project, most recent first.
 
+## Fix the real root cause: Super Art needs 3 bars, we checked for 1
+
+- Likely the actual explanation for the whole "supers never connect"
+  saga: arcade-fighter.com's SF3 Ken guide lists Shippu Jinraikyaku (SA3,
+  Ken's forced default) as costing 3 full bars in 3rd Strike specifically
+  — we'd been checking `gauge >= 1` in `whiff_punish.lua` this entire
+  time. Cross-checked against our own session logs (`tools/match_logger.lua`)
+  before trusting it: gauge never once reached 3 across a full recorded
+  session, meaning every whiff-punish attempt that tried the Super Art was
+  always short on real meter, regardless of range or timing.
+- New `SUPER_ART_METER_COST = 3` constant, gate changed from `gauge >= 1`
+  to `gauge >= SUPER_ART_METER_COST`. The range fix and the
+  interrupted-sequence fix earlier were real, separate bugs too — this
+  doesn't undo either, it's the third piece of the same puzzle.
+- Not live-confirmed yet: need a match where gauge genuinely reaches 3 to
+  see the Super Art actually come out and connect.
+
 ## Abort the punish combo's finisher if the starter clearly whiffed
 
 - Reported live as an exploitable pattern: after Ken threw a whiffed Super

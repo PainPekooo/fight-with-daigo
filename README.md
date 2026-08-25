@@ -109,7 +109,9 @@ without touching the controller. During the match:
   made the whole combo start too far out to ever connect; checked the real
   hitboxes in the local reference framedata and brought it back down),
   with a combo (cr.MK or cr.MP, picked at random, canceled into Super Art
-  if there's meter, or into shoryuken if not) instead of a single hit —
+  if there's a real full 3 bars — Shippu Jinraikyaku's actual cost in 3rd
+  Strike, not the 1 we checked for most of this project's life — or into
+  shoryuken if not) instead of a single hit —
   the whiff-punish idea itself is the only rule based on real research
   about Daigo (see above); the specific starters are real Ken
   bread-and-butter (cited in `combo_punish.lua`), not generic fundamentals.
